@@ -1,100 +1,100 @@
-vless://897a4bec-26b8-11e8-94be-00505695472c@104.16.59.184:443?type=ws&security=none&sni=xv6.jpmj.dpdns.org#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.16.59.184
-vless://92f481b6-ad92-43e4-a683-2bb0aeaa9846@104.17.105.92:80?type=ws&security=none&path=#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.17.105.92
-vless://53fa8faf-ba4b-4322-9c69-a3e5b1555049@108.165.216.20:8880?type=ws&security=none&path=/?ed=2560#US   VLESS-WS-NTLS - Cloudflare London, LLC  108.165.216.20
-vless://08fb790c-1d2d-433c-a588-fa3b6193c926@104.16.102.112:2096?type=ws&security=tls&path=/2096/@V2RayyNGVpn&sni=rEDzOnE.MirAcLehEaRTbIt.ICu&fp=chrome#XX   VLESS-WS-TLS - CLOUDFLARENET  104.16.102.112
-vless://b99590df-eda0-4e34-e1a9-3d1118faed83@91.193.59.134:8880?type=httpupgrade&security=none&path=/#GB   VLESS-HTTPUPGRADE-NTLS - Cloudflare London, LLC  91.193.59.134
-ss://cmM0LW1kNToxNGZGUHJiZXpFM0hEWnpzTU9yNg@138.199.42.68:8080#US   SHADOWSOCKS-TCP-NTLS - Datacamp Limited  138.199.42.68
-vless://4525d5e6-4981-4fed-8268-a6f1c53aefc1@172.67.171.12:2087?type=tcp&security=tls&sni=#XX   VLESS-TCP-TLS - CLOUDFLARENET  172.67.171.12
-vless://55520747-311e-4015-83ce-be46e2060ce3@160.79.104.79:443?type=ws&security=none&sni=ca.bgm2024.dpdns.org#US   VLESS-WS-NTLS - ANTHROPIC  160.79.104.79
-vless://897a4bec-26b8-11e8-94be-00505695472c@104.16.4.112:443?type=ws&security=none&sni=xv6.jpmj.dpdns.org#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.16.4.112
-vless://53fa8faf-ba4b-4322-9c69-a3e5b1555049@5.10.244.234:8880?type=ws&security=none&path=/TelegramU0001F1E8U0001F1F3&sni=reedfree8mahsang2.redorg.ir#NL   VLESS-WS-NTLS - Cloudflare London, LLC  5.10.244.234
-vless://53fa8faf-ba4b-4322-9c69-a3e5b1555049@185.135.9.180:2086?type=ws&security=none#DE   VLESS-WS-NTLS - Cloudflare London, LLC  185.135.9.180
-vless://55520747-311e-4015-83ce-be46e2060ce3@185.133.35.154:443?type=ws&security=none&sni=cl.bgm2024.dpdns.org#BR   VLESS-WS-NTLS - LINKED STORE BRASIL CRIACAO E DESENVOL DE SOFTWARE  185.133.35.154
-vless://89b3cbba-e6ac-485a-9481-976a0415eab9@199.232.0.177:443?type=ws&security=none&path=#US   VLESS-WS-NTLS - FASTLY  199.232.0.177
-vless://fab7bf9c-ddb9-4563-8a04-fb01ce6c0fbf@114.129.43.168:8880?type=ws&security=none&path=#NZ   VLESS-WS-NTLS - Cloudflare London, LLC  114.129.43.168
-vless://53fa8faf-ba4b-4322-9c69-a3e5b1555049@5.10.247.1:8880?type=ws&security=none&path=#NL   VLESS-WS-NTLS - Cloudflare London, LLC  5.10.247.1
-vless://89b3cbba-e6ac-485a-9481-976a0415eab9@167.82.97.49:443?type=ws&security=none&path=#US   VLESS-WS-NTLS - FASTLY  167.82.97.49
-vless://53fa8faf-ba4b-4322-9c69-a3e5b1555049@5.10.244.31:8880?type=ws&security=none&path=/TelegramU0001F1E8U0001F1F3&sni=reedfree8mahsang2.redorg.ir#NL   VLESS-WS-NTLS - Cloudflare London, LLC  5.10.244.31
+vless://80ebecda-dc08-4a75-b2b0-b31868ebc6bb@216.239.34.21:443?type=ws&security=tls&path=/ms138/&sni=gcdn.freenet-rd.xyz#US   VLESS-WS-TLS - GOOGLE  216.239.34.21
+vless://53fa8faf-ba4b-4322-9c69-a3e5b1555049@34.160.118.77:80?type=ws&security=none&path=#US   VLESS-WS-NTLS - GOOGLE-CLOUD-PLATFORM  34.160.118.77
+trojan://0000000@18.238.109.28:443/?type=tcp&security=tls&sni=
+trojan://0000000@18.238.109.41:443/?type=tcp&security=tls&sni=
+vless://26fc1d92-2188-42fa-b36e-91caa13df437@151.101.186.133:443?type=ws&security=none&path=#US   VLESS-WS-NTLS - FASTLY  151.101.186.133
+vless://89b3cbba-e6ac-485a-9481-976a0415eab9@199.232.1.255:443?type=ws&security=none&path=#US   VLESS-WS-NTLS - FASTLY  199.232.1.255
 vless://6486c034-4380-4601-b35b-85ba3a65feb0@151.101.69.22:443?type=xhttp&security=tls&path=/IHavEComEHOmEWIthOnlyONEGoal?ed=2048&sni=barayeazadi.sbs&fp=random#US   VLESS-XHTTP-TLS - FASTLY  151.101.69.22
 vless://6d4ddb94-ebb6-4884-9711-00d0ca9d7dbe@151.101.194.200:80?type=ws&security=none#US   VLESS-WS-NTLS - FASTLY  151.101.194.200
-vless://10b3cbba-e6ac-485a-8381-976a0415eab9@104.21.7.212:443?type=ws&security=tls&path=/&sni=esETseCuRITyLICENSE.sIQIlwDQ.wOrKErs.deV&fp=chrome#XX   VLESS-WS-TLS - CLOUDFLARENET  104.21.7.212
-vless://7379eb18-959d-4b33-ddf7-e9369a0e1769@170.114.46.169:443?type=grpc&security=tls&sni=ger.vwfghin.info#US   VLESS-GRPC-TLS - Cloudflare London, LLC  170.114.46.169
-vless://b5cca0ed-3a09-4bd7-af2a-eae57769e19d@188.114.97.0:443?type=ws&security=none&path=#XX   VLESS-WS-NTLS - CLOUDFLARENET  188.114.97.0
-vless://b99590df-eda0-4e34-e1a9-3d1118faed83@88.216.67.222:8880?type=httpupgrade&security=none&path=/#LT   VLESS-HTTPUPGRADE-NTLS - Cloudflare London, LLC  88.216.67.222
-vless://897a4bec-26b8-11e8-94be-00505695472c@104.19.57.235:443?type=ws&security=none&sni=xv6.jpmj.dpdns.org#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.19.57.235
-vless://a13df940-020c-465f-bc89-ee5279b5cd6a@69.84.182.59:443?type=tcp&security=tls&sni=#US   VLESS-TCP-TLS - HMS-ASN  69.84.182.59
-vless://531caad7-3533-405d-af03-7c01c3afdf32@151.101.2.168:80?type=ws&security=none&path=#US   VLESS-WS-NTLS - FASTLY  151.101.2.168
-trojan://NISHIKUITAN111@104.27.36.103:443?security=tls#XX   TROJAN-TCP-TLS - CLOUDFLARENET  104.27.36.103
-trojan://Aimer@108.165.152.18:2087?sni=epmw.ambercc.filegear-sg.me&peer=epmw.ambercc.filegear-sg.me&security=tls#US   TROJAN-TCP-TLS - Cloudflare London, LLC  108.165.152.18
-trojan://Aimer@104.17.235.145:443?sni=epccv.ambercc.filegear-sg.me&peer=epccv.ambercc.filegear-sg.me&security=tls#XX   TROJAN-TCP-TLS - CLOUDFLARENET  104.17.235.145
-trojan://01596265-168b-46a7-bcb7-25662c7a9546@188.114.98.0:443?security=tls&sni=
-trojan://061ec9d5-ba40-428a-8be0-1947b10b5cfc@172.67.207.27:443/?type=ws&path=
-trojan://0b65bb06-6b28-487a-8e3c-820dda51e977@104.21.12.87:443/?type=ws&path=%2F43xf5zgeApzDAfhOHq&security=tls&sni=series-v1.samanehha.co#%F0%9F%8F%81RELAY-104.21.12.87-8983
-trojan://2e65577e-8fdb-4bb1-a495-96f3122099a7@172.67.191.174:443/?type=tcp&security=tls&sni=zzzZZZZz.222769.XYZ#%F0%9F%8F%81RELAY-172.67.191.174-0177
-trojan://2e7d3f13-be1b-479c-94ff-0e95c2bd565d@209.46.30.11:443?security=tls&sni=
+trojan://29e0206a-2cef-4c8d-aa4b-dd7a43748167@151.101.2.133:443/?type=ws&host=fonmelo.com&security=tls&sni=
+vless://53fa8faf-ba4b-4322-9c69-a3e5b1555049@45.131.210.162:80?type=ws&security=none&path=Telegram@WangCai2/?ed&sni=redfree8.pooriashop.ir#NL   VLESS-WS-NTLS - Cloudflare London, LLC  45.131.210.162
+vless://ee2bb495-2632-445b-b1f8-3c476a50b78b@45.131.5.84:2053?type=tcp&security=none&path=#NL   VLESS-TCP-NTLS - Cloudflare London, LLC  45.131.5.84
+vless://590dfbde-f8c8-429b-b947-39bb767ddd9c@104.24.87.230:80?type=ws&security=none&path=#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.24.87.230
+ss://Y2hhY2hhMjAtaWV0Zi1wb2x5MTMwNTp0MHNybWR4cm0zeHlqbnZxejlld2x4YjJteXE3cmp1dg@88.210.36.108:2377#US   SHADOWSOCKS-TCP-NTLS - Melbikomas UAB  88.210.36.108
+vless://0da65197-aee5-42e0-8676-bd090f95dd6c@151.101.2.219:443?type=ws&security=none&path=#US   VLESS-WS-NTLS - FASTLY  151.101.2.219
 vless://05dc7e04-4ee0-4c72-8acb-145b8122077d@162.159.192.21:443?type=ws&security=tls&path=/?ed=2048&sni=steep-pine-3b0b.facic63646.workers.dev&fp=chrome#XX   VLESS-WS-TLS - CLOUDFLARENET  162.159.192.21
-vless://01970283-51b9-4ad4-96ef-9dfc8ee3dd74@194.76.18.253:2087?type=grpc&security=tls&sni=#KZ   VLESS-GRPC-TLS - Mikrofinansovaya organizaciya Robocash.kz LLP  194.76.18.253
-vless://b99590df-eda0-4e34-e1a9-3d1118faed83@104.129.167.246:8880?type=httpupgrade&security=none&path=/#US   VLESS-HTTPUPGRADE-NTLS - Cloudflare London, LLC  104.129.167.246
-vless://d6660712-4d18-47fd-b095-0c36db667250@104.18.28.219:443?type=ws&security=tls&path=/?ed=2048&sni=sweet-sound-523a.66500-280b-471c-b2b8-d68b7f9960014.workers.dev&fp=chrome#XX   VLESS-WS-TLS - CLOUDFLARENET  104.18.28.219
+vless://4f8b6d2a-daa9-4b87-87ee-7f058fce85c1@170.114.45.42:443?type=ws&security=tls&path=/?ed=2048&sni=xxx.66500-280b-471c-b2b8-d68b7f9960011.workers.dev&fp=chrome#US   VLESS-WS-TLS - Cloudflare London, LLC  170.114.45.42
+vless://818a98bf-e7d0-45d5-800b-24d4058234c6@104.24.172.153:80?type=ws&security=none&path=#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.24.172.153
+vmess://eyJ2IjoiMiIsInBzIjoiU0UgXHVkODNjXHVkZGY4XHVkODNjXHVkZGVhIFx1MjUwNyBWTUVTUy1XUy1OVExTIC0gQ0xPVURGTEFSRU5FVCBcdTI1MDcgMTg1LjE0Ni4xNzMuMTE3IiwiYWRkIjoiMTg1LjE0Ni4xNzMuMTE3IiwicG9ydCI6ODAsImlkIjoiZDk2N2ZmY2EtZGU5MC00ZGFhLWJkMDAtZDUyN2U1YmFlMTFmIiwiYWlkIjowLCJzY3kiOiJhdXRvIiwibmV0Ijoid3MiLCJ0eXBlIjoiLS0tIiwicGF0aCI6Ii8/QklBX1RFTEVHUkFNIChAQVpBUkJBWUpBQjEpIFRNIChAQVpBUkJBWUpBQjEpIFRNIChAQVpBUkJBWUpBQjEpIFRNIChAQVpBUkJBWUpBQjEpIFRNIChAQVpBUkJBWUpBQjEpIFRNIChAQVpBUkJBWUpBQjEpIn0
+vless://b5441b0d-2147-4898-8a6a-9b2c87f58382@195.26.229.3:8880?type=ws&security=none&path=#CY   VLESS-WS-NTLS - Cloudflare London, LLC  195.26.229.3
+vless://e4824193-4f54-453b-d037-88368e85ef0e@198.71.190.197:443?type=grpc&security=tls&sni=#US   VLESS-GRPC-TLS - GO-DADDY-COM-LLC  198.71.190.197
+vless://be813f12-47ac-4b16-9146-8435ebacae3f@104.24.170.5:443?type=ws&security=none&sni=xw0083.dpdns.org#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.24.170.5
+vless://fa050497-fc2a-45ee-89c0-96670c4ecb65@104.21.70.32:443?type=ws&security=none&path=#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.21.70.32
+vless://583ceab3-4022-4553-9158-9bedc625ad4e@185.193.29.177:8880?type=ws&security=none&path=#GB   VLESS-WS-NTLS - Cloudflare London, LLC  185.193.29.177
+vless://fab7bf9c-ddb9-4563-8a04-fb01ce6c0fbf@91.193.58.17:8880?type=ws&security=none&path=/TelegramU0001F1E8U0001F1F3&sni=sk.laoyoutiao.link#GB   VLESS-WS-NTLS - Cloudflare London, LLC  91.193.58.17
+vless://4c56316a-6fa0-4f1e-8f97-9f0ce56c1f9e@188.114.98.19:443?type=ws&security=tls&path=/?ed=2048&sni=xxx.66500-280b-471c-b2b8-d68b7f9960004.workers.dev&fp=chrome#XX   VLESS-WS-TLS - CLOUDFLARENET  188.114.98.19
+vless://897a4bec-26b8-11e8-94be-00505695472c@172.67.156.241:443?type=ws&security=none&sni=xv6.jpmj.dpdns.org#XX   VLESS-WS-NTLS - CLOUDFLARENET  172.67.156.241
+vless://6e9cd42d-bc35-4713-f92d-16e428e9578f@199.232.123.118:80?type=ws&security=none&path=/@vistav2ray---@vistav2ray----@vistav2ray----@vistav2ray----@vistav2ray----@vistav2ray----@vistav2ray----@vistav2ray----@vistav2ray----@vistav2ray----@vist#US   VLESS-WS-NTLS - FASTLY  199.232.123.118
+vless://a13df940-020c-465f-bc89-ee5279b5cd6a@192.200.160.44:443?type=tcp&security=tls&sni=#US   VLESS-TCP-TLS - BIGCOMMERCE  192.200.160.44
+vless://8c129b7d-c87f-42d7-bdac-55dfbfe88534@104.21.22.88:8080?type=ws&security=none&path=#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.21.22.88
 vless://23b3cbba-e6ac-485a-9481-342a0415eab9@104.21.81.174:80?type=ws&security=none#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.21.81.174
 vless://f775978b-6e22-41a8-ae5e-5f9779e6745f@170.114.45.25:443?type=ws&security=tls&sni=#US   VLESS-WS-TLS - Cloudflare London, LLC  170.114.45.25
+vless://583ceab3-4022-4553-9158-9bedc625ad4e@108.165.216.177:8880?type=ws&security=none&path=#US   VLESS-WS-NTLS - Cloudflare London, LLC  108.165.216.177
+vless://53fa8faf-ba4b-4322-9c69-a3e5b1555049@185.18.250.162:8880?type=ws&security=none&path=/Channel id: @ShadowProxy66?ed=2560#CH   VLESS-WS-NTLS - Cloudflare London, LLC  185.18.250.162
+vmess://eyJ2IjoiMiIsInBzIjoiWFggXHVkODNjXHVkZmYzXHVmZTBmIFx1MjUwNyBWTUVTUy1XUy1OVExTIC0gQ0xPVURGTEFSRU5FVCBcdTI1MDcgMTQxLjEwMS4xMjAuMTMwIiwiYWRkIjoiMTQxLjEwMS4xMjAuMTMwIiwicG9ydCI6ODAsImlkIjoiZDk2N2ZmY2EtZGU5MC00ZGFhLWJkMDAtZDUyN2U1YmFlMTFmIiwiYWlkIjowLCJzY3kiOiJhdXRvIiwibmV0Ijoid3MiLCJ0eXBlIjoiLS0tIiwiaG9zdCI6IlRNX0FaQVJCU1lKQUIxLk5FVy4xLlBBR0VTLkRFVi4iLCJwYXRoIjoiLz8tLS1AQVpBUkJBWUtBQjEtLS1AQVpBUkJBWUpBQjEtLS1AQVpBUkJBWUpBQjEtLS1AQVpBUkJBWUpBQjEtLS1AQVpBUkJBWUpBQjEvP2VkPTI1NjAiLCJzbmkiOiJUTV9BWkFSQlNZSkFCMS5ORVcuMS5QQUdFUy5ERVYuIn0
+vless://96a1b724-68d2-4f4d-ab25-38ecd83577bc@45.131.210.109:2096?type=ws&security=none&path=#NL   VLESS-WS-NTLS - Cloudflare London, LLC  45.131.210.109
+vless://d342d11e-d424-4583-b36e-524ab1f0afa4@104.18.40.206:443?type=ws&security=tls&sni=a.xn--i-sx6a60i.us.kg#XX   VLESS-WS-TLS - CLOUDFLARENET  104.18.40.206
 vless://aef9ab0f-fb0e-40ce-bb9b-beacaf6a2db6@172.67.169.146:8443?type=ws&security=tls&sni=#XX   VLESS-WS-TLS - CLOUDFLARENET  172.67.169.146
+vless://fad329ac-313b-471c-8d94-a6e8f598990e@188.114.97.139:80?type=tcp&security=none&path=#XX   VLESS-TCP-NTLS - CLOUDFLARENET  188.114.97.139
+vless://53fa8faf-ba4b-4322-9c69-a3e5b1555049@198.41.200.20:8880?type=ws&security=none&path=/?ed=2560&sni=reedfree8mahsang2.redorg.ir#XX   VLESS-WS-NTLS - CLOUDFLARENET  198.41.200.20
+vless://9900e8bb-d01b-42a6-ba16-17f958fa0b6c@92.53.190.149:2096?type=ws&security=tls&path=/2096/@VRayyNGvpn&sni=bEAt.MIRaclETaxbiTS.Top.#SI   VLESS-WS-TLS - Cloudflare London, LLC  92.53.190.149
+vless://9a620099-7df2-4935-9c01-d52a3897512a@151.101.69.6:80?type=tcp&security=none#US   VLESS-TCP-NTLS - FASTLY  151.101.69.6
+vless://bc4d6d45-b412-4867-b6e2-0b9a885e620a@104.21.13.74:443?type=ws&security=tls&path=/?ed=2560&sni=paralyticileus.xp21.workers.dev#XX   VLESS-WS-TLS - CLOUDFLARENET  104.21.13.74
+vless://384193af-acf4-4e3d-a570-5720befa42ee@173.245.59.16:80?type=ws&security=none&path=#XX   VLESS-WS-NTLS - CLOUDFLARENET  173.245.59.16
+vless://897a4bec-26b8-11e8-94be-00505695472c@162.159.138.98:443?type=ws&security=none&sni=xv6.jpmj.dpdns.org#XX   VLESS-WS-NTLS - CLOUDFLARENET  162.159.138.98
 vless://908fe4f8-eb66-42eb-bd97-8d88be7f0ac4@172.67.195.73:2053?type=ws&security=tls&path=/?ed=2560&sni=txmt.conetcdata.dpdns.org&fp=random#XX   VLESS-WS-TLS - CLOUDFLARENET  172.67.195.73
 vless://53fa8faf-ba4b-4322-9c69-a3e5b1555049@5.10.215.211:8880?type=ws&security=none&path=#DE   VLESS-WS-NTLS - CLOUDFLARENET  5.10.215.211
-vless://f775978b-6e22-41a8-ae5e-5f9779e6745f@104.18.77.36:443?type=tcp&security=tls&sni=#XX   VLESS-TCP-TLS - CLOUDFLARENET  104.18.77.36
+vless://96a1b724-68d2-4f4d-ab25-38ecd83577bc@194.36.55.55:8443?type=ws&security=tls&path=/&sni=QtRkJtLt27.pRiMeXaD.OrG&fp=chrome#GB   VLESS-WS-TLS - Cloudflare London, LLC  194.36.55.55
 vless://e9979910-79d1-4621-a93c-b2a579c44ba7@104.25.220.177:8880?type=ws&security=none&path=#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.25.220.177
 vless://b077fb58-0b18-43a2-b2e9-dfe2a6b464db@104.18.6.215:2087?type=grpc&security=tls&sni=smart.trainofy.info#XX   VLESS-GRPC-TLS - CLOUDFLARENET  104.18.6.215
-vless://897a4bec-26b8-11e8-94be-00505695472c@104.16.52.167:443?type=ws&security=none&sni=xv6.jpmj.dpdns.org#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.16.52.167
-vless://53fa8faf-ba4b-4322-9c69-a3e5b1555049@45.131.210.39:8880?type=ws&security=none&sni=reedfree8mahsang2.redorg.ir#NL   VLESS-WS-NTLS - Cloudflare London, LLC  45.131.210.39
-vless://897a4bec-26b8-11e8-94be-00505695472c@104.16.34.228:443?type=ws&security=none&sni=xv6.jpmj.dpdns.org#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.16.34.228
-vless://53fa8faf-ba4b-4322-9c69-a3e5b1555049@5.10.244.27:8880?type=ws&security=none&path=/TelegramU0001F1E8U0001F1F3&sni=reedfree8mahsang2.redorg.ir#NL   VLESS-WS-NTLS - Cloudflare London, LLC  5.10.244.27
+vless://0132166f-e702-48ed-a9e7-b07af768faf8@199.34.230.251:8880?type=ws&security=none&path=#US   VLESS-WS-NTLS - WEEBLY  199.34.230.251
+vless://2cd6ed0f-636e-4e6c-9449-5a263d7a0fa5@89.116.161.250:8443?type=tcp&security=tls&sni=#LT   VLESS-TCP-TLS - Cloudflare London, LLC  89.116.161.250
+vless://53fa8faf-ba4b-4322-9c69-a3e5b1555049@45.131.4.120:80?type=ws&security=none&path=Telegram@WangCai2/?ed&sni=301.pooriam.ir#NL   VLESS-WS-NTLS - Cloudflare London, LLC  45.131.4.120
+vless://3e9d9ee2-ba23-4269-8340-c8c8ac1455cb@172.66.45.4:2087?type=ws&security=tls&path=/Z0R9Nb1Hgd7OEULT?ed=2560&sni=WeekNDJOoN.PAgES.DEv&fp=randomized#XX   VLESS-WS-TLS - CLOUDFLARENET  172.66.45.4
+vless://9a9a8e07-2735-46cb-9a94-686d030ca654@104.21.44.35:443?type=ws&security=none&path=#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.21.44.35
+vless://ee2bb495-2632-445b-b1f8-3c476a50b78b@45.131.210.67:2053?type=tcp&security=none&path=#NL   VLESS-TCP-NTLS - Cloudflare London, LLC  45.131.210.67
+vless://d342d11e-d424-4583-b36e-524ab1f0afa4@104.20.30.125:443?type=ws&security=none&path=#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.20.30.125
+vless://ee2bb495-2632-445b-b1f8-3c476a50b78b@45.85.118.85:2053?type=tcp&security=none&path=#RO   VLESS-TCP-NTLS - Cloudflare London, LLC  45.85.118.85
+vless://0132166f-e702-48ed-a9e7-b07af768faf8@45.142.120.251:8880?type=ws&security=none&path=#RU   VLESS-WS-NTLS - Cloudflare London, LLC  45.142.120.251
+vless://7585f059-2c89-4a02-9dff-394bb7913ef5@198.41.196.109:2096?type=ws&security=none&path=#XX   VLESS-WS-NTLS - CLOUDFLARENET  198.41.196.109
+vless://03e4d6fe-f461-499f-b9c6-35c60f192e1a@172.64.148.32:80?type=ws&security=none&path=#XX   VLESS-WS-NTLS - CLOUDFLARENET  172.64.148.32
+ss://cmM0LW1kNToxNGZGUHJiZXpFM0hEWnpzTU9yNg@79.110.53.169:8080#US   SHADOWSOCKS-TCP-NTLS - M247 Europe SRL  79.110.53.169
+vless://96a1b724-68d2-4f4d-ab25-38ecd83577bc@45.131.210.185:2096?type=ws&security=tls&path=/&sni=JpHzJdVn23.bLuEvIa.oRg&fp=chrome#NL   VLESS-WS-TLS - Cloudflare London, LLC  45.131.210.185
+vless://583ceab3-4022-4553-9158-9bedc625ad4e@185.176.26.186:8880?type=tcp&security=none&sni=#KZ   VLESS-TCP-NTLS - Cloudflare London, LLC  185.176.26.186
+vless://fab7bf9c-ddb9-4563-8a04-fb01ce6c0fbf@45.67.215.29:8880?type=ws&security=none&path=/TelegramU0001F1E8U0001F1F3&sni=hk.laoyoutiao.link#RU   VLESS-WS-NTLS - Zaymer PJSC  45.67.215.29
+vless://a6784d39-64c1-4ead-9845-9b1b95753718@104.21.72.166:443?type=tcp&security=tls&sni=#XX   VLESS-TCP-TLS - CLOUDFLARENET  104.21.72.166
+vless://53fa8faf-ba4b-4322-9c69-a3e5b1555049@108.165.216.20:8880?type=ws&security=none&path=/?ed=2560#US   VLESS-WS-NTLS - Cloudflare London, LLC  108.165.216.20
+vless://76b3cbba-e6ac-485a-9481-336a0415eab9@172.67.157.202:443?type=ws&security=tls&path=/&sni=oLD-DISK-EFcD.jOJahOf109.woRkeRS.dEv&fp=chrome#XX   VLESS-WS-TLS - CLOUDFLARENET  172.67.157.202
+vless://4088e698-69fd-4d15-98bc-f1fe4c071642@199.34.228.67:443?type=ws&security=tls&sni=digitalscientificresearchgroup.ir#US   VLESS-WS-TLS - WEEBLY  199.34.228.67
+vless://f775978b-6e22-41a8-ae5e-5f9779e6745f@27.50.49.13:443?type=ws&security=tls&sni=#SG   VLESS-WS-TLS - Cloudflare London, LLC  27.50.49.13
+vless://96a1b724-68d2-4f4d-ab25-38ecd83577bc@147.185.161.112:2096?type=ws&security=tls&path=/&sni=JpHzJdVn23.bLuEvIa.oRg&fp=chrome#US   VLESS-WS-TLS - Cloudflare London, LLC  147.185.161.112
+vless://a6b9bd95-2c9c-44f9-8089-0bb197893605@172.64.33.81:443?type=ws&security=none&path=#XX   VLESS-WS-NTLS - CLOUDFLARENET  172.64.33.81
+vless://9fc80977-d06e-42f8-b451-379a9e4c3047@172.64.68.37:443?type=ws&security=none&sni=test.989819.xyz#XX   VLESS-WS-NTLS - CLOUDFLARENET  172.64.68.37
+vless://b99590df-eda0-4e34-e1a9-3d1118faed83@45.131.211.252:8880?type=httpupgrade&security=none&path=/#NL   VLESS-HTTPUPGRADE-NTLS - Cloudflare London, LLC  45.131.211.252
+vmess://eyJ2IjoiMiIsInBzIjoiWFggXHVkODNjXHVkZmYzXHVmZTBmIFx1MjUwNyBWTUVTUy1XUy1UTFMgLSBDTE9VREZMQVJFTkVUIFx1MjUwNyAxNzIuNjcuNjguMjQ2IiwiYWRkIjoiMTcyLjY3LjY4LjI0NiIsInBvcnQiOjQ0MywiaWQiOiIwM2ZjYzYxOC1iOTNkLTY3OTYtNmFlZC04YTM4Yzk3NWQ1ODEiLCJhaWQiOjAsInNjeSI6ImF1dG8iLCJuZXQiOiJ3cyIsInR5cGUiOiJub25lIiwiaG9zdCI6InZpcDIzMjMuY2ZkIiwicGF0aCI6Ii9saW5rdndzIiwidGxzIjoidGxzIiwic25pIjoidmlwMjMyMy5jZmQifQ
+vless://06e4425e-a8cb-4b63-929f-2105604ab0a9@130.250.137.163:443?type=ws&security=none&sni=lx.ylks0033.dpdns.org#US   VLESS-WS-NTLS - PIC-EXT  130.250.137.163
+vless://fab7bf9c-ddb9-4563-8a04-fb01ce6c0fbf@91.193.58.7:8880?type=ws&security=none&path=#GB   VLESS-WS-NTLS - Cloudflare London, LLC  91.193.58.7
+vless://897a4bec-26b8-11e8-94be-00505695472c@172.67.164.107:443?type=ws&security=none&sni=xv6.jpmj.dpdns.org#XX   VLESS-WS-NTLS - CLOUDFLARENET  172.67.164.107
 vless://583ceab3-4022-4553-9158-9bedc625ad4e@103.245.228.188:8880?type=tcp&security=none&sni=#IN   VLESS-TCP-NTLS - Cloudflare London, LLC  103.245.228.188
-vless://96a1b724-68d2-4f4d-ab25-38ecd83577bc@45.12.31.12:2096?type=ws&security=tls&path=/&sni=JpHzJdVn23.bLuEvIa.oRg&fp=chrome#RO   VLESS-WS-TLS - Cloudflare London, LLC  45.12.31.12
-vless://96b148b6-c8a0-481a-8332-f0e7b1f9f49d@172.66.47.43:2087?type=ws&security=tls&sni=maHDiSErver-OVG.Pages.Dev&fp=chrome#XX   VLESS-WS-TLS - CLOUDFLARENET  172.66.47.43
-vless://30f2d443-af46-4dd6-83c9-b5e17299ebd2@104.26.14.69:2096?type=ws&security=none&path=#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.26.14.69
-vless://05dc7e04-4ee0-4c72-8acb-145b8122077d@172.64.151.234:443?type=ws&security=tls&path=/?ed=2048&sni=sweet-sound-523a.66500-280b-471c-b2b8-d68b7f9960014.workers.dev&fp=chrome#XX   VLESS-WS-TLS - CLOUDFLARENET  172.64.151.234
-vless://0f8691e2-c289-481b-9dcb-7a4578eab343@172.66.44.104:8443?type=ws&security=tls&path=/g7gLAgweCiEhLgds?ed=2560&sni=87AE4B92.BeStTTtTIvpn.pAgES.DeV&fp=randomized#XX   VLESS-WS-TLS - CLOUDFLARENET  172.66.44.104
-vless://d12e7198-95d4-41f1-b4d2-a94a1ee28546@45.149.12.254:8443?type=ws&security=none&path=#NL   VLESS-WS-NTLS - Cloudflare London, LLC  45.149.12.254
-vless://401374e6-df77-41fb-f638-dad8184f175b@45.80.111.32:443?type=grpc&security=tls&sni=#DE   VLESS-GRPC-TLS - Cloudflare London, LLC  45.80.111.32
-vless://74a4f351-1f64-4a24-98ac-a1a86dba7f4c@104.21.5.65:8443?type=tcp&security=none&path=#XX   VLESS-TCP-NTLS - CLOUDFLARENET  104.21.5.65
-vless://53fa8faf-ba4b-4322-9c69-a3e5b1555049@5.10.244.225:8880?type=ws&security=none&path=/TelegramU0001F1E8U0001F1F3&sni=reedfree8mahsang2.redorg.ir#NL   VLESS-WS-NTLS - Cloudflare London, LLC  5.10.244.225
-vless://ea179d57-abac-444b-8c7c-ac7a2726f55f@104.26.8.225:443?type=ws&security=tls&path=/?ed=2048&sni=xxx.66500-280b-471c-b2b8-d68b7f9960010.workers.dev&fp=chrome#XX   VLESS-WS-TLS - CLOUDFLARENET  104.26.8.225
-vless://b99590df-eda0-4e34-e1a9-3d1118faed83@104.254.140.61:8880?type=httpupgrade&security=none&path=/#US   VLESS-HTTPUPGRADE-NTLS - Cloudflare London, LLC  104.254.140.61
-vless://897a4bec-26b8-11e8-94be-00505695472c@104.19.45.67:443?type=ws&security=none&sni=xv6.jpmj.dpdns.org#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.19.45.67
-vless://5df7962e-f9fe-41e6-ab49-ed96ccb856a7@104.21.69.154:80?type=ws&security=none&path=@VPNHTTPInjectorfree#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.21.69.154
-vless://06e4425e-a8cb-4b63-929f-2105604ab0a9@194.76.18.83:443?type=ws&security=none&path=#KZ   VLESS-WS-NTLS - Mikrofinansovaya organizaciya Robocash.kz LLP  194.76.18.83
-vless://18758238-2625-2730-3680-fbd541b89a84@104.19.165.111:443?type=grpc&security=tls&sni=jhdmkjv.fdaamazonfa.com&fp=chrome#XX   VLESS-GRPC-TLS - CLOUDFLARENET  104.19.165.111
-vless://cc6b985d-0362-4129-8763-38564174fb3e@92.243.75.136:443?type=grpc&security=tls&sni=#SG   VLESS-GRPC-TLS - Cloudflare London, LLC  92.243.75.136
-vless://583ceab3-4022-4553-9158-9bedc625ad4e@45.131.6.177:8880?type=tcp&security=none&sni=#NL   VLESS-TCP-NTLS - Cloudflare London, LLC  45.131.6.177
-vless://435bda4c-fe5e-42c9-a3ad-15334943b38a@104.17.46.209:80?type=ws&security=none&path=#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.17.46.209
-vless://06e4425e-a8cb-4b63-929f-2105604ab0a9@185.133.35.85:443?type=ws&security=tls&path=/?ed=2560&sni=vz.ylks0033.dpdns.org#BR   VLESS-WS-TLS - LINKED STORE BRASIL CRIACAO E DESENVOL DE SOFTWARE  185.133.35.85
-vmess://eyJ2IjoiMiIsInBzIjoiWFggXHVkODNjXHVkZmYzXHVmZTBmIFx1MjUwNyBWTUVTUy1XUy1UTFMgLSBDTE9VREZMQVJFTkVUIFx1MjUwNyAxOTAuOTMuMjQ2LjIiLCJhZGQiOiIxOTAuOTMuMjQ2LjIiLCJwb3J0Ijo0NDMsImlkIjoiNDBkNDk2YTYtY2VlYi00MDk2LWJhZWItNGNjNTJiMjA1NjIxIiwiYWlkIjowLCJzY3kiOiJhdXRvIiwibmV0Ijoid3MiLCJ0eXBlIjoibm9uZSIsInBhdGgiOiIvRUNUQ0owREYiLCJ0bHMiOiJ0bHMifQ
-vless://781a8eb4-c4f7-4f99-9dee-e80369dbf1ec@104.18.25.186:80?type=ws&security=none&path=#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.18.25.186
-vless://d342d11e-d424-4583-b36e-524ab1f0afa4@172.64.147.50:443?type=ws&security=tls&sni=a.xn--i-sx6a60i.us.kg#XX   VLESS-WS-TLS - CLOUDFLARENET  172.64.147.50
-vless://401374e6-df77-41fb-f638-dad8184f175b@141.11.203.139:443?type=grpc&security=tls&sni=#FR   VLESS-GRPC-TLS - Cloudflare London, LLC  141.11.203.139
-vless://53fa8faf-ba4b-4322-9c69-a3e5b1555049@5.10.245.98:8880?type=ws&security=none&path=/Telegram&sni=reedfree8mahsang2.redorg.ir#NL   VLESS-WS-NTLS - Cloudflare London, LLC  5.10.245.98
-vless://d118038f-0d72-4b45-8cce-bcf237487f41@104.21.54.238:443?type=ws&security=tls&sni=xxx.66500-280b-471c-b2b8-d68b7f9960001.workers.dev&fp=chrome#XX   VLESS-WS-TLS - CLOUDFLARENET  104.21.54.238
-vmess://ewogICAgImFkZCI6ICJzeTQuNjIwNzIwLnh5eiIsCiAgICAiYWlkIjogMCwKICAgICJob3N0IjogInN5NC42MjA3MjAueHl6IiwKICAgICJpZCI6ICI1MTZkOGE3YS0zZjBiLTQxZDMtYmFkMC0yNDYxMTYzODE1MTYiLAogICAgIm5ldCI6ICJ3cyIsCiAgICAicGF0aCI6ICIvIiwKICAgICJwb3J0IjogNDQzLAogICAgInBzIjogIvCfj4FSRUxBWS0xNzIuNjcuMTk3LjQ3LTA0MTAiLAogICAgInRscyI6ICJ0bHMiLAogICAgInR5cGUiOiAiYXV0byIsCiAgICAic2VjdXJpdHkiOiAiYXV0byIsCiAgICAic2tpcC1jZXJ0LXZlcmlmeSI6IHRydWUsCiAgICAic25pIjogIiIKfQ==
-trojan://Aimer@154.197.64.104:8443?sni=&peer=&security=tls#SC   TROJAN-TCP-TLS - Cloudflare London, LLC  154.197.64.104
-trojan://blue2024@104.17.208.66:443?sni=&peer=&security=tls#XX   TROJAN-TCP-TLS - CLOUDFLARENET  104.17.208.66
-trojan://blue2024@190.93.247.68:443?sni=&peer=&security=tls#XX   TROJAN-TCP-TLS - CLOUDFLARENET  190.93.247.68
-trojan://5a2c16f9@104.19.55.205:443?sni=snippets.kkii.eu.org&peer=snippets.kkii.eu.org&security=tls#XX   TROJAN-TCP-TLS - CLOUDFLARENET  104.19.55.205
-trojan://Aimer@104.16.52.150:443?sni=epccv.ambercc.filegear-sg.me&peer=epccv.ambercc.filegear-sg.me&security=tls#XX   TROJAN-TCP-TLS - CLOUDFLARENET  104.16.52.150
-trojan://Aimer@104.16.53.186:443?sni=epccf.ambercc.filegear-sg.me&peer=epccf.ambercc.filegear-sg.me&security=tls#XX   TROJAN-TCP-TLS - CLOUDFLARENET  104.16.53.186
-trojan://Aimer@45.194.53.13:2053?sni=agept.ambercc.filegear-sg.me&peer=agept.ambercc.filegear-sg.me&security=tls#US   TROJAN-TCP-TLS - Cloudflare London, LLC  45.194.53.13
-trojan://Aimer@104.16.50.211:443?sni=epccv.ambercc.filegear-sg.me&peer=epccv.ambercc.filegear-sg.me&security=tls#XX   TROJAN-TCP-TLS - CLOUDFLARENET  104.16.50.211
-trojan://Aimer@104.18.68.94:443?sni=epccv.ambercc.filegear-sg.me&peer=epccv.ambercc.filegear-sg.me&security=tls#XX   TROJAN-TCP-TLS - CLOUDFLARENET  104.18.68.94
-trojan://Aimer@154.197.64.173:2053?security=tls#SC   TROJAN-TCP-TLS - Cloudflare London, LLC  154.197.64.173
-trojan://9e7caa3b-ca9c-40ba-9ea0-f0c992359239@104.21.86.140:443?sni=m2rrrty.777219.xyz&peer=m2rrrty.777219.xyz&security=tls#XX   TROJAN-TCP-TLS - CLOUDFLARENET  104.21.86.140
-trojan://%3AbC5%5Elakx%3E%24d@172.66.45.9:443?path=
-trojan://0346cf80-8b9b-11ee-ac12-1239d0255272@162.159.138.232:443?security=tls&sni=
-trojan://072f4db4-d89d-420d-9d9e-045ed8d5c9cc@172.67.162.74:443/?type=tcp&security=tls&sni=
-trojan://072f4db4-d89d-420d-9d9e-045ed8d5c9cc@172.67.215.15:443/?type=tcp&security=tls&sni=10xcvb.he2022.filegear-sg.me#%40Hope_Net-join-us-on-Telegram
-trojan://0RiSuJPsug%23v@104.21.43.168:443/?type=ws&host=2.lINK-KoN.IR&path=%2FtrTcwZRw8JC0TPp6d1%3Fed%3D2560&security=tls&sni=2.link-kon.ir&alpn=h3%2Ch2%2Chttp%2F1.1&fp=randomized#%E2%87%9D%20%40GpConnectSho%20%DA%A9%D8%A7%D9%86%DA%A9%D8%AA%20%D8%B4%D9%88%21%20%F0%9F%93%8C
-trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@104.16.192.1:443/?type=tcp&security=tls&sni=
-trojan://0ab6c98dae3b48e8b9c4a776b6c9c19a@104.17.147.11:443?security=tls&type=ws&sni=
-trojan://0b971bb0-f0af-11ee-8f57-1239d0255272@172.67.159.13:443/?type=tcp&security=tls&sni=
-trojan://0f7070cd-c91d-4532-a51f-56da4f0e94be@172.67.150.132:443/?type=tcp&security=tls&sni=eeddcvfgt6.444682.xyz#%F0%9F%8F%81RELAY-172.67.150.132-0187
-trojan://0f7070cd-c91d-4532-a51f-56da4f0e94be@172.67.150.132:443/?type=tcp&security=tls&sni=
-trojan://123456@104.25.165.83:8443/?type=ws&host=top-azx.pages.dev&security=tls&sni=
-trojan://123456@bpbg.anguswen.top:2053?security=tls&sni=bpBG.anGusWen.TOp&alpn=http%2F1.1&insecure=0&allowInsecure=0&type=ws&path=%2FeyJqdW5rIjoiZkdPanhyQWgiLCJwcm90b2NvbCI6InRyIiwibW9kZSI6InByb3h5aXAiLCJwYW5lbElQcyI6WyJicGIueW91c2VmLmlzZWdhcm8uY29tIl19%3Fed%3D2560#@melirproxyy
+vless://b99590df-eda0-4e34-e1a9-3d1118faed83@91.193.59.134:8880?type=httpupgrade&security=none&path=/#GB   VLESS-HTTPUPGRADE-NTLS - Cloudflare London, LLC  91.193.59.134
+vless://31a27ed1-2ec6-4ab5-95b6-3e213e59e0a9@141.193.213.122:2087?type=ws&security=tls&path=/&sni=Tp3993VbRi.ScOrPiOnBiGpLaY.oRg&fp=chrome#US   VLESS-WS-TLS - Cloudflare London, LLC  141.193.213.122
+vless://19b3cbba-e6ac-485a-9481-926a0415eab2@172.67.189.174:80?type=ws&security=none&path=/#XX   VLESS-WS-NTLS - CLOUDFLARENET  172.67.189.174
+vless://897a4bec-26b8-11e8-94be-00505695472c@104.19.42.172:443?type=ws&security=none&sni=xv6.jpmj.dpdns.org#XX   VLESS-WS-NTLS - CLOUDFLARENET  104.19.42.172
+vless://96a1b724-68d2-4f4d-ab25-38ecd83577bc@104.254.140.140:2096?type=ws&security=tls&path=/&sni=LhCgBjGr29.vElTrIxS.OrG&fp=chrome#US   VLESS-WS-TLS - Cloudflare London, LLC  104.254.140.140
+vless://505f0436-dad0-4af8-b3ad-c5116153339f@172.67.73.139:443?type=ws&security=tls&path=/admin&sni=zitel.digikala-aparat-zula.com&fp=randomized#XX   VLESS-WS-TLS - CLOUDFLARENET  172.67.73.139
+vless://d342d11e-d424-4583-b36e-524ab1f0afa4@50.62.172.113:80?type=ws&security=none#US   VLESS-WS-NTLS - GO-DADDY-COM-LLC  50.62.172.113
+vless://4525d5e6-4981-4fed-8268-a6f1c53aefc1@172.67.171.12:2087?type=tcp&security=tls&sni=#XX   VLESS-TCP-TLS - CLOUDFLARENET  172.67.171.12
+vless://89b3cbba-e6ac-485a-9481-976a0415eab9@199.232.79.58:443?type=ws&security=tls&sni=#US   VLESS-WS-TLS - FASTLY  199.232.79.58
+vless://53fa8faf-ba4b-4322-9c69-a3e5b1555049@45.80.111.185:8880?type=ws&security=none&sni=reedfree8mahsang2.redorg.ir#DE   VLESS-WS-NTLS - Cloudflare London, LLC  45.80.111.185
+vless://06e4425e-a8cb-4b63-929f-2105604ab0a9@162.159.153.110:443?type=ws&security=none&path=#XX   VLESS-WS-NTLS - CLOUDFLARENET  162.159.153.110
+vless://0132166f-e702-48ed-a9e7-b07af768faf8@162.120.94.251:8880?type=tcp&security=none&sni=#US   VLESS-TCP-NTLS - Cloudflare London, LLC  162.120.94.251
+vless://b99590df-eda0-4e34-e1a9-3d1118faed83@185.148.104.218:8880?type=httpupgrade&security=none&path=/#RU   VLESS-HTTPUPGRADE-NTLS - Cloudflare London, LLC  185.148.104.218
+vless://dc977bb9-e998-48a2-9459-f1931cd7fa9b@104.24.146.230:443?type=ws&security=tls&sni=kx.yage.pp.ua#XX   VLESS-WS-TLS - CLOUDFLARENET  104.24.146.230
+vless://c88b1fb9-e2dd-4713-b670-a84aae1386be@162.159.195.124:443?type=ws&security=tls&path=/?ed=2048&sni=xxx.66500-280b-471c-b2b8-d68b7f9960003.workers.dev&fp=chrome#XX   VLESS-WS-TLS - CLOUDFLARENET  162.159.195.124
+vless://53fff6cc-b4ec-43e8-ade5-e0c42972fc33@185.143.232.224:80?type=tcp&security=none&path=#IR   VLESS-TCP-NTLS - Noyan Abr Arvan Co. ( Private Joint Stock)  185.143.232.224
+vless://53fa8faf-ba4b-4322-9c69-a3e5b1555049@5.10.244.234:8880?type=ws&security=none&path=/TelegramU0001F1E8U0001F1F3&sni=reedfree8mahsang2.redorg.ir#NL   VLESS-WS-NTLS - Cloudflare London, LLC  5.10.244.234
+vless://b99590df-eda0-4e34-e1a9-3d1118faed83@89.116.46.14:8880?type=httpupgrade&security=none&path=/#DE   VLESS-HTTPUPGRADE-NTLS - Cloudflare London, LLC  89.116.46.14
+vless://b99590df-eda0-4e34-e1a9-3d1118faed83@45.80.108.36:8880?type=httpupgrade&security=none&path=/#EE   VLESS-HTTPUPGRADE-NTLS - Cloudflare London, LLC  45.80.108.36
+vless://71ed6628-5870-4d19-8a52-f2a3ba3d4898@162.159.153.48:443?type=ws&security=none&path=#XX   VLESS-WS-NTLS - CLOUDFLARENET  162.159.153.48
+vless://53fa8faf-ba4b-4322-9c69-a3e5b1555049@185.135.9.180:2086?type=ws&security=none#DE   VLESS-WS-NTLS - Cloudflare London, LLC  185.135.9.180
+vless://cc6b985d-0362-4129-8763-38564174fb3e@92.243.75.72:443?type=grpc&security=tls&sni=#SG   VLESS-GRPC-TLS - Cloudflare London, LLC  92.243.75.72
