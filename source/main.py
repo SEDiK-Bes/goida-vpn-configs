@@ -57,7 +57,7 @@ offset = thistime.strftime("%H:%M | %d.%m.%Y")
 
 GITHUB_TOKEN = os.environ.get("MY_TOKEN")
 REPO_NAME = "SEDiK-Bes/goida-vpn-configs"  # <-- ОБЯЗАТЕЛЬНО ИЗМЕНИТЕ НА ВАШЕ ИМЯ РЕПОЗИТОРИЯ!
-
+REPO_NAME
 if GITHUB_TOKEN:
     g = Github(auth=Auth.Token(GITHUB_TOKEN))
 else:
