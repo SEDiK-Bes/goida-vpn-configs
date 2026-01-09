@@ -1,5 +1,4 @@
-.github/workflows/update-configs.yml
-name: 🚀 Auto Update VPN Configs
+name: update-configs.yml
 
 on:
   schedule:
