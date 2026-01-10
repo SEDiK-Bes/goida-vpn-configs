@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""GOIDA VPN v14.0 - No splitting, just works"""
-import os, sys, base64, re, time
+"""GOIDA VPN v14.1 - Generate all.txt + s-happ.txt (Europe by ping)"""
+import os, sys, base64, re, time, socket, html, urllib.parse
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from collections import defaultdict
 import requests
 
 TOKEN = os.environ.get('MY_TOKEN', '').strip()
@@ -10,7 +11,7 @@ if not TOKEN or not TOKEN.startswith('ghp_'):
 
 START = time.time()
 print('\n' + '='*70)
-print('🚳 GOIDA VPN v14.0 - SIMPLE & WORKING')
+print('🚳 GOIDA VPN v14.1 - WITH S-HAPP EUROPEAN RANKING')
 print('='*70 + '\n')
 
 def log_t(msg):
@@ -50,6 +51,16 @@ SNI_SOURCES = [
     'https://raw.githubusercontent.com/zieng2/wl/main/vless.txt',
 ]
 
+# European country codes
+EUROPEAN_COUNTRIES = {
+    'NL', 'DE', 'FR', 'GB', 'UK', 'SE', 'NO', 'FI', 'PL', 'IT', 'ES', 'CH', 'AT', 'BE', 'CZ', 'DK', 'IE', 'RO', 'PT', 'GR',
+    'HR', 'HU', 'SK', 'SI', 'BG', 'LT', 'LV', 'EE', 'IS'
+}
+
+MAX_PING_MS = 300
+CONNECTION_TIMEOUT = 2.0
+MAX_CONFIGS_PER_FILE = 100
+
 def is_valid(line):
     if not line or len(line) < 10 or len(line) > 5000: return False
     line = line.strip()
@@ -84,6 +95,113 @@ def gh_push(path, content):
         return r.status_code in (200, 201)
     except:
         return False
+
+def extract_host_port(config_line):
+    """Extract host:port from config string (vmess/vless/trojan/ss)"""
+    try:
+        config_line = config_line.strip()
+        # vmess base64
+        if config_line.startswith('vmess://'):
+            try:
+                payload = config_line[8:]
+                rem = len(payload) % 4
+                if rem:
+                    payload += '=' * (4 - rem)
+                decoded = base64.b64decode(payload).decode('utf-8', errors='ignore')
+                if decoded.startswith('{'):
+                    j = eval(decoded)
+                    host = j.get('add') or j.get('host') or j.get('ip')
+                    port = j.get('port')
+                    if host and port:
+                        return (str(host), int(port))
+            except: pass
+        # vless/trojan/ss pattern: proto://...@host:port
+        match = re.search(r'@([^:/?]+):([0-9]{2,5})', config_line)
+        if match:
+            return (match.group(1), int(match.group(2)))
+    except: pass
+    return (None, None)
+
+def extract_country(config_line):
+    """Extract country code/name from config fragment (after #)"""
+    try:
+        if '#' in config_line:
+            fragment = config_line.split('#', 1)[1]
+            fragment = html.unescape(urllib.parse.unquote(fragment)).upper()
+            # Look for 2-letter country code
+            for cc in EUROPEAN_COUNTRIES:
+                if cc in fragment:
+                    return cc
+    except: pass
+    return None
+
+def check_ping(host, port):
+    """Measure ping as TCP connect time in ms"""
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(CONNECTION_TIMEOUT)
+        start = time.time()
+        result = sock.connect_ex((host, port))
+        sock.close()
+        if result == 0:
+            elapsed_ms = int((time.time() - start) * 1000)
+            if elapsed_ms <= MAX_PING_MS:
+                return elapsed_ms
+    except: pass
+    return -1
+
+def test_config(config_line):
+    """Test single config and return (config, ping_ms, country_code)"""
+    host, port = extract_host_port(config_line)
+    if not host or not port:
+        return (config_line, -1, None)
+    ping_ms = check_ping(host, port)
+    country = extract_country(config_line)
+    return (config_line, ping_ms, country)
+
+def generate_s_happ(all_configs):
+    """Generate s-happ.txt: rank European configs by ping, select top 10 countries"""
+    log_t(f'PHASE 3B: Testing {len(all_configs)} configs for ping and country...')
+    
+    tested = []
+    with ThreadPoolExecutor(max_workers=20) as ex:
+        futures = [ex.submit(test_config, cfg) for cfg in all_configs]
+        for f in as_completed(futures):
+            tested.append(f.result())
+    
+    # Group by country
+    by_country = defaultdict(list)
+    for cfg, ping_ms, country in tested:
+        if ping_ms > 0 and country:  # Only successful, country-detected configs
+            by_country[country].append((cfg, ping_ms))
+    
+    log_t(f'Found {len(by_country)} European countries with live configs')
+    
+    # Sort within each country by ping
+    for cc in by_country:
+        by_country[cc].sort(key=lambda x: x[1])
+    
+    # Select top 10 countries by: count (>=3) + avg ping
+    country_stats = []
+    for cc in by_country:
+        if len(by_country[cc]) >= 3:
+            avg_ping = sum(p for _, p in by_country[cc][:5]) / len(by_country[cc][:5])
+            country_stats.append((cc, len(by_country[cc]), avg_ping))
+    
+    country_stats.sort(key=lambda x: (x[2], -x[1]))  # Sort by avg ping, then by count
+    top_10_countries = [cc for cc, _, _ in country_stats[:10]]
+    
+    log_t(f'Selected top 10 countries: {", ".join(sorted(top_10_countries))}')
+    
+    # Build output
+    output_lines = []
+    for country in sorted(top_10_countries):
+        output_lines.append(f'# {country}')
+        # Take top 3-5 per country
+        for cfg, ping_ms in by_country[country][:5]:
+            output_lines.append(cfg)
+    
+    return '\n'.join(output_lines)
 
 # === DOWNLOAD ===
 log_t('PHASE 1: Downloading sources...')
@@ -120,7 +238,7 @@ log_t('PHASE 3: Deduplicating...')
 unique = sorted(list(set(all_configs)))
 log_t(f'Unique: {len(unique)} configs')
 
-# === PUSH ===
+# === PUSH all.txt ===
 log_t('PHASE 4: Pushing all.txt...')
 content = '\n'.join(unique)
 if gh_push('githubmirror/all.txt', content):
@@ -128,6 +246,16 @@ if gh_push('githubmirror/all.txt', content):
 else:
     log_t(f'✗ all.txt FAILED')
 
+# === GENERATE & PUSH s-happ.txt ===
+log_t('PHASE 5: Generating s-happ.txt...')
+s_happ_content = generate_s_happ(unique)
+if gh_push('githubmirror/s-happ.txt', s_happ_content):
+    log_t(f'✓ s-happ.txt: {len(s_happ_content.encode("utf-8")):,} bytes')
+else:
+    log_t(f'✗ s-happ.txt FAILED')
+
 elapsed = time.time() - START
 print(f'\n✅ SUCCESS! Time: {elapsed:.1f}s')
-print(f'📁 File: githubmirror/all.txt ({len(unique)} configs)\n')
+print(f'📁 Files:')
+print(f'   • all.txt: {len(unique)} configs')
+print(f'   • s-happ.txt: European selection\n')
