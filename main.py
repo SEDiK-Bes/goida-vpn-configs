@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""GOIDA VPN v15.0 - Generate all.txt + s-happ.txt (Europe) + happ.txt (RU regions + world)"""
+"""GOIDA VPN v15.1 - Generate all.txt + s-happ.txt (Europe + RU regions + world)"""
 import os, sys, base64, re, time, socket, html, urllib.parse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import defaultdict
@@ -11,11 +11,13 @@ if not TOKEN or not TOKEN.startswith('ghp_'):
 
 START = time.time()
 print('\n' + '='*70)
-print('🚳 GOIDA VPN v15.0 - WITH S-HAPP & HAPP WORLD RANKING')
+print('🚳 GOIDA VPN v15.1 - WITH S-HAPP (EU + RU + AS + AM + AF)')
 print('='*70 + '\n')
+
 
 def log_t(msg):
     print(f'[{time.time()-START:6.2f}s] {msg}')
+
 
 SOURCES = [
     'https://raw.githubusercontent.com/sakha1370/OpenRay/refs/heads/main/output/all_valid_proxies.txt',
@@ -81,7 +83,7 @@ COUNTRIES_ALL = EUROPEAN_COUNTRIES | ASIA_COUNTRIES | AMERICAS_COUNTRIES | AFRIC
     'AU', 'NZ'
 }
 
-# Russian regions for happ.txt (labels)
+# Russian regions for happ part (labels)
 RU_REGION_LABELS = {
     'RU-MSK': ['MOSCOW', 'MOSKVA', 'МОСКВА', 'MSK'],
     'RU-SPB': ['SAINT PETERSBURG', 'ST. PETERSBURG', 'ST PETERSBURG', 'SANKT-PETERBURG', 'САНКТ-ПЕТЕРБУРГ', 'ПИТЕР', 'SPB'],
@@ -161,7 +163,7 @@ def extract_host_port(config_line):
     return (None, None)
 
 
-def _extract_remark_fragment(config_line: str) -> str | None:
+def _extract_remark_fragment(config_line: str):
     if '#' not in config_line:
         return None
     fragment = config_line.split('#', 1)[1]
@@ -226,9 +228,9 @@ def test_config(config_line):
     return (config_line, ping_ms, country, ru_region)
 
 
-def generate_s_happ(all_configs):
-    """Generate s-happ.txt: rank European configs by ping, select top 10 countries"""
-    log_t(f'PHASE 3B: Testing {len(all_configs)} configs for ping and country (EU)...')
+def generate_s_happ_europe(all_configs):
+    """Generate European part of s-happ.txt: top 10 EU countries by ping"""
+    log_t(f'PHASE 5A: Testing {len(all_configs)} configs for ping and country (EU)...')
 
     tested = []
     with ThreadPoolExecutor(max_workers=20) as ex:
@@ -303,15 +305,17 @@ def _select_top_countries(by_country: dict, required: list[str], max_countries: 
     return selected
 
 
-def generate_happ(all_configs):
-    """Generate happ.txt: Russia regions + Asia, Americas, Africa by ping"""
-    log_t(f'PHASE 6: Testing {len(all_configs)} configs for ping, country, regions (world)...')
+def generate_happ_world(all_configs):
+    """Generate world part of s-happ.txt: Russia regions + Asia, Americas, Africa"""
+    log_t(f'PHASE 5B: Testing {len(all_configs)} configs for ping, country, regions (world)...')
 
     tested = []
     with ThreadPoolExecutor(max_workers=20) as ex:
         futures = [ex.submit(test_config, cfg) for cfg in all_configs]
         for f in as_completed(futures):
             tested.append(f.result())
+
+    lines = []
 
     # ---------------- RUSSIA REGIONS ----------------
     ru_by_region = defaultdict(list)
@@ -334,16 +338,11 @@ def generate_happ(all_configs):
     ru_region_stats.sort(key=lambda x: (x[2], -x[1]))
     selected_ru_regions = [reg for reg, _cnt, _avg in ru_region_stats[:5]]
 
-    # Build output lines
-    lines = []
     for reg in selected_ru_regions:
         header = reg.lower().replace('_', '-')  # RU-MSK -> ru-msk
         lines.append(f'# {header}')
         for cfg, ping_ms in ru_by_region[reg][:5]:
             lines.append(cfg)
-
-    # Ensure at least 10 RU configs if possible (soft requirement)
-    # (не жёстко, если по факту меньше — оставляем как есть)
 
     # ---------------- ASIA ----------------
     asia_by_country = defaultdict(list)
@@ -439,25 +438,26 @@ if gh_push('githubmirror/all.txt', content):
 else:
     log_t(f'✗ all.txt FAILED')
 
-# === GENERATE & PUSH s-happ.txt (EUROPE) ===
-log_t('PHASE 5: Generating s-happ.txt (Europe)...')
-s_happ_content = generate_s_happ(unique)
-if gh_push('githubmirror/s-happ.txt', s_happ_content):
-    log_t(f'✓ s-happ.txt: {len(s_happ_content.encode("utf-8")):,} bytes')
+# === GENERATE & PUSH s-happ.txt (EU + WORLD) ===
+log_t('PHASE 5: Generating s-happ.txt (Europe + Russia + Asia + Americas + Africa)...')
+
+s_happ_eu = generate_s_happ_europe(unique)
+world_part = generate_happ_world(unique)
+
+if s_happ_eu and world_part:
+    s_happ_combined = s_happ_eu + '\n\n' + world_part
+elif s_happ_eu:
+    s_happ_combined = s_happ_eu
+else:
+    s_happ_combined = world_part
+
+if gh_push('githubmirror/s-happ.txt', s_happ_combined):
+    log_t(f'✓ s-happ.txt: {len(s_happ_combined.encode("utf-8")):,} bytes')
 else:
     log_t(f'✗ s-happ.txt FAILED')
-
-# === GENERATE & PUSH happ.txt (WORLD) ===
-log_t('PHASE 6: Generating happ.txt (Russia + Asia + Americas + Africa)...')
-happ_content = generate_happ(unique)
-if gh_push('githubmirror/happ.txt', happ_content):
-    log_t(f'✓ happ.txt: {len(happ_content.encode("utf-8")):,} bytes')
-else:
-    log_t(f'✗ happ.txt FAILED')
 
 elapsed = time.time() - START
 print(f'\n✅ SUCCESS! Time: {elapsed:.1f}s')
 print(f'📁 Files:')
 print(f'   • all.txt: {len(unique)} configs')
-print(f'   • s-happ.txt: European selection')
-print(f'   • happ.txt: Russia regions + Asia/Americas/Africa selection\n')
+print(f'   • s-happ.txt: EU + RU regions + Asia/Americas/Africa selection\n')
