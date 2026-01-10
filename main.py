@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""GOIDA VPN v12.0 FINAL - Split by SIZE, not by COUNT"""
+"""GOIDA VPN v13.0 - Fixed size splitting"""
 import os, sys, base64, re, time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
@@ -10,7 +10,7 @@ if not TOKEN or not TOKEN.startswith('ghp_'):
 
 START = time.time()
 print('\n' + '='*70)
-print('🔥 GOIDA VPN v12.0 FINAL - SPLIT BY SIZE')
+print('🚧 GOIDA VPN v13.0 - HOTFIX')
 print('='*70 + '\n')
 
 def log_t(msg):
@@ -83,7 +83,8 @@ def gh_push(path, content):
         if sha: data['sha'] = sha
         r = requests.put(url, headers=gh_headers(), json=data, timeout=10)
         return r.status_code in (200, 201)
-    except:
+    except Exception as e:
+        log_t(f'gh_push error for {path}: {e}')
         return False
 
 # === PHASE 1: Download ===
@@ -99,7 +100,6 @@ with ThreadPoolExecutor(max_workers=25) as ex:
             if valids:
                 all_configs.extend(valids)
                 ok_count += 1
-                log_t(f'✓ Source {idx}: {len(valids)} configs')
 
 log_t(f'Downloaded: {ok_count}/25 sources, {len(all_configs)} total')
 
@@ -118,37 +118,47 @@ log_t(f'SNI: {len(sni_valids)} configs')
 log_t(f'TOTAL before dedup: {len(all_configs)} configs')
 
 if not all_configs:
-    log_t('ERROR: No configs collected!'); sys.exit(1)
+    log_t('ERROR: No configs'); sys.exit(1)
 
 # === PHASE 3: Dedup & Sort ===
 log_t('PHASE 3: Deduplicating...')
 unique = sorted(list(set(all_configs)))
 log_t(f'Unique: {len(unique)} configs')
 
-# === PHASE 4: Split by SIZE (not count) ===
+# === PHASE 4: Split by SIZE (FIXED) ===
 log_t('PHASE 4: Splitting by SIZE (2.5MB per file)...')
-MAX_SIZE = 2500000  # 2.5MB max per file
+MAX_SIZE = 2500000  # 2.5MB
 parts = []
-current = []
+current_part = []
 current_size = 0
 
 for config in unique:
-    config_bytes = len(config.encode('utf-8')) + 1  # +1 for newline
-    if current_size + config_bytes > MAX_SIZE and current:
-        parts.append(current)
-        current = []
-        current_size = 0
-    current.append(config)
-    current_size += config_bytes
+    config_str = config + '\n'
+    config_bytes = len(config_str.encode('utf-8'))
+    
+    # If adding this config would exceed limit AND we have something in current_part
+    if current_size + config_bytes > MAX_SIZE and current_part:
+        parts.append(current_part)  # Save current part
+        current_part = [config]     # Start new part with this config
+        current_size = config_bytes
+    else:
+        current_part.append(config)
+        current_size += config_bytes
 
-if current:
-    parts.append(current)
+# Don't forget the last part
+if current_part:
+    parts.append(current_part)
 
+log_t(f'Created {len(parts)} parts')
 for i, p in enumerate(parts, 1):
-    size = len('\n'.join(p).encode('utf-8'))
-    log_t(f'Part {i}: {len(p)} configs ({size:,} bytes)')
+    content_str = '\n'.join(p)
+    size = len(content_str.encode('utf-8'))
+    log_t(f'  Part {i}: {len(p)} configs ({size:,} bytes)')
 
-# === PHASE 5: Push to GitHub ===
+if not parts:
+    log_t('ERROR: No parts created'); sys.exit(1)
+
+# === PHASE 5: Push ===
 log_t('PHASE 5: Pushing to GitHub...')
 push_ok = 0
 for i, p in enumerate(parts, 1):
@@ -156,18 +166,18 @@ for i, p in enumerate(parts, 1):
     content = '\n'.join(p)
     if gh_push(path, content):
         size = len(content.encode('utf-8'))
-        log_t(f'✓ {path} ({size:,} bytes)')
+        log_t(f'✓ {path} ({size:,} bytes, {len(p)} configs)')
         push_ok += 1
     else:
         log_t(f'✗ {path} FAILED')
     time.sleep(0.3)
 
-# all.txt combined
+# === all.txt ===
 log_t('PHASE 6: Creating all.txt...')
 all_content = '\n'.join(unique)
 if gh_push('githubmirror/all.txt', all_content):
     size = len(all_content.encode('utf-8'))
-    log_t(f'✓ all.txt ({size:,} bytes)')
+    log_t(f'✓ all.txt ({size:,} bytes, {len(unique)} configs)')
     push_ok += 1
 else:
     log_t(f'✗ all.txt FAILED')
@@ -176,4 +186,4 @@ elapsed = time.time() - START
 print(f'\n✅ SUCCESS! Time: {elapsed:.1f}s')
 print(f'📊 Total: {len(unique)} unique configs')
 print(f'📁 Files: {len(parts)} split files + all.txt')
-print(f'✓ Pushed: {push_ok}/{len(parts)+1} files\n')
+print(f'✓ Pushed: {push_ok}/{len(parts)+1}\n')
