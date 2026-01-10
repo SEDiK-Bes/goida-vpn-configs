@@ -9,7 +9,7 @@ TOKEN = os.environ.get('MY_TOKEN', '').strip()
 REPO_FULL = os.environ.get('REPO_NAME', 'SEDiK-Bes/goida-vpn-configs').strip()
 
 print('\n' + '='*70)
-print('[INIT] Starting GOIDA VPN v10.2 SEQUENTIAL')
+print('[INIT] Starting GOIDA VPN v10.3 FIXED VERIFICATION')
 print('='*70)
 
 print(f'\n[DEBUG] Token check:')
@@ -132,12 +132,15 @@ def gh_verify_all_txt():
         r = requests.get(f'{GITHUB_API}/repos/{OWNER}/{REPO}/contents/githubmirror/all.txt', headers=gh_headers(), timeout=10)
         if r.status_code == 200:
             data = r.json()
-            decoded = base64.b64decode(data['content'])
-            lines = decoded.count(b'\n') + 1 if decoded else 0
-            return (True, lines, data.get('size', 0))
+            decoded = base64.b64decode(data['content']).decode('utf-8')
+            lines = [l.strip() for l in decoded.split('\n') if l.strip()]
+            config_count = len(lines)
+            file_size = data.get('size', 0)
+            return (True, config_count, file_size)
         else:
             return (False, 0, 0)
     except Exception as e:
+        log_time(f'Verification error: {e}', 'ERROR')
         return (False, 0, 0)
 
 def main():
@@ -241,15 +244,16 @@ def main():
         sys.exit(1)
     
     log_time('PHASE 5: Verifying all.txt on GitHub...', 'PHASE')
-    success, lines, size = gh_verify_all_txt()
-    if success:
+    success, config_count, file_size = gh_verify_all_txt()
+    if success and config_count > 0:
         elapsed = time.time() - START_TIME
-        log_time(f'VERIFIED: {lines} configs, {size} bytes', 'OK')
+        log_time(f'VERIFIED: {config_count} configs, {file_size} bytes', 'OK')
         print('\n' + '='*70)
         print(f'SUCCESS! Time: {elapsed:.2f}s')
+        print(f'Total configs in all.txt: {config_count}')
         print('='*70 + '\n')
     else:
-        log_time('VERIFICATION FAILED!', 'ERROR')
+        log_time(f'VERIFICATION FAILED! config_count={config_count}, file_size={file_size}', 'ERROR')
         sys.exit(1)
 
 if __name__ == '__main__':
