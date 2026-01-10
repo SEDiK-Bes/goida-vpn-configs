@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""GOIDA VPN v15.1 - Generate all.txt + s-happ.txt (Europe + RU regions + world)"""
+"""GOIDA VPN v4.2 - EC (от-10) + RU (обязательный) + Мир (все регионы)"""
 import os, sys, base64, re, time, socket, html, urllib.parse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import defaultdict
@@ -11,7 +11,7 @@ if not TOKEN or not TOKEN.startswith('ghp_'):
 
 START = time.time()
 print('\n' + '='*70)
-print('🚳 GOIDA VPN v15.1 - WITH S-HAPP (EU + RU + AS + AM + AF)')
+print('🚳 GOIDA VPN v4.2 - EC (от-10) | RU (обязательный) | Мир (остальные)')
 print('='*70 + '\n')
 
 
@@ -53,44 +53,19 @@ SNI_SOURCES = [
     'https://raw.githubusercontent.com/zieng2/wl/main/vless.txt',
 ]
 
-# Country code sets
-EUROPEAN_COUNTRIES = {
+# ==================== РЕГИОНАЛЬНАЯ ФИЛЬТРАЦИЯ ====================
+
+EC_COUNTRIES = {
     'NL', 'DE', 'FR', 'GB', 'UK', 'SE', 'NO', 'FI', 'PL', 'IT', 'ES', 'CH', 'AT', 'BE', 'CZ', 'DK', 'IE', 'RO', 'PT', 'GR',
     'HR', 'HU', 'SK', 'SI', 'BG', 'LT', 'LV', 'EE', 'IS'
 }
 
-ASIA_COUNTRIES = {
-    'RU', 'TR', 'CY', 'GE', 'AM', 'AZ',
-    'JP', 'KR', 'CN', 'HK', 'MO', 'TW', 'SG', 'MY', 'ID', 'TH', 'VN', 'PH', 'LA', 'KH', 'BN',
-    'IN', 'PK', 'BD', 'LK', 'NP', 'MV',
-    'KZ', 'UZ', 'TJ', 'TM', 'KG',
-    'AE', 'SA', 'KW', 'QA', 'BH', 'OM', 'IR', 'IQ', 'JO', 'IL', 'PS', 'YE', 'SY', 'LB'
-}
+RU_COUNTRIES = {'RU', 'KZ', 'BY', 'UZ'}  # Россия + страны СНГ (обязательный блок)
 
-AMERICAS_COUNTRIES = {
-    'US', 'CA', 'MX', 'GT', 'HN', 'SV', 'NI', 'CR', 'PA', 'CU', 'DO', 'HT',
-    'BR', 'AR', 'CL', 'CO', 'PE', 'EC', 'UY', 'PY', 'BO', 'VE', 'GY', 'SR'
-}
-
-AFRICA_COUNTRIES = {
-    'ZA', 'EG', 'MA', 'TN', 'DZ', 'LY', 'SD', 'SS', 'ET', 'ER', 'DJ', 'SO',
-    'NG', 'GH', 'CI', 'SN', 'ML', 'BF', 'NE', 'TD', 'CM', 'CD', 'CG', 'KE', 'TZ', 'UG', 'RW', 'BI', 'MW', 'MZ', 'AO', 'NA',
-    'ZW', 'ZM', 'BW', 'LS', 'SZ', 'GM', 'GW', 'SL', 'LR', 'GA', 'GQ', 'ST', 'CV', 'MG', 'MU', 'SC'
-}
-
-# All country codes we try to detect in remarks
-COUNTRIES_ALL = EUROPEAN_COUNTRIES | ASIA_COUNTRIES | AMERICAS_COUNTRIES | AFRICA_COUNTRIES | {
-    'AU', 'NZ'
-}
-
-# Russian regions for happ part (labels)
-RU_REGION_LABELS = {
-    'RU-MSK': ['MOSCOW', 'MOSKVA', 'МОСКВА', 'MSK'],
-    'RU-SPB': ['SAINT PETERSBURG', 'ST. PETERSBURG', 'ST PETERSBURG', 'SANKT-PETERBURG', 'САНКТ-ПЕТЕРБУРГ', 'ПИТЕР', 'SPB'],
-    'RU-NSK': ['NOVOSIBIRSK', 'НОВОСИБИРСК', 'NSK'],
-    'RU-EKT': ['YEKATERINBURG', 'EKATERINBURG', 'ЕКАТЕРИНБУРГ', 'EKB', 'ЕКБ'],
-    'RU-KZN': ['KAZAN', 'КАЗАНЬ'],
-    'RU-VVO': ['VLADIVOSTOK', 'ВЛАДИВОСТОК'],
+WORLD_COUNTRIES = {
+    'US', 'CA', 'MX', 'BR', 'AR', 'JP', 'KR', 'CN', 'IN', 'AU', 'NZ', 'TR', 'CY', 'GE', 'AM', 'AZ',
+    'TH', 'SG', 'MY', 'ID', 'VN', 'PH', 'AE', 'SA', 'IL', 'IR', 'EG', 'ZA', 'NG', 'HK', 'MO', 'TW',
+    'PK', 'BD', 'LK', 'NP', 'TJ', 'TM', 'KG', 'KW', 'QA', 'BH', 'OM', 'IQ', 'JO', 'PS', 'YE', 'SY', 'LB'
 }
 
 MAX_PING_MS = 300
@@ -140,7 +115,6 @@ def extract_host_port(config_line):
     """Extract host:port from config string (vmess/vless/trojan/ss)"""
     try:
         config_line = config_line.strip()
-        # vmess base64
         if config_line.startswith('vmess://'):
             try:
                 payload = config_line[8:]
@@ -155,7 +129,6 @@ def extract_host_port(config_line):
                     if host and port:
                         return (str(host), int(port))
             except: pass
-        # vless/trojan/ss pattern: proto://...@host:port
         match = re.search(r'@([^:/?]+):([0-9]{2,5})', config_line)
         if match:
             return (match.group(1), int(match.group(2)))
@@ -172,33 +145,19 @@ def _extract_remark_fragment(config_line: str):
 
 
 def extract_country(config_line):
-    """Extract 2-letter country code from remark using simple heuristics"""
+    """Extract 2-letter country code from remark"""
     try:
         fragment = _extract_remark_fragment(config_line)
         if not fragment:
-            return None
-        # Try direct 2-letter codes from our known list
-        for cc in COUNTRIES_ALL:
+            return 'UNKNOWN'
+        
+        all_countries = EC_COUNTRIES | RU_COUNTRIES | WORLD_COUNTRIES
+        
+        for cc in all_countries:
             if cc in fragment:
                 return cc
     except: pass
-    return None
-
-
-def extract_ru_region(config_line):
-    """Detect Russian region label (RU-MSK, RU-SPB, etc.) from remark"""
-    try:
-        fragment = _extract_remark_fragment(config_line)
-        if not fragment:
-            return None
-        if 'RU' not in fragment and 'RUS' not in fragment and 'РОСС' not in fragment and '🇷🇺' not in fragment:
-            return None
-        for label, keywords in RU_REGION_LABELS.items():
-            for kw in keywords:
-                if kw in fragment:
-                    return label
-    except: pass
-    return None
+    return 'UNKNOWN'
 
 
 def check_ping(host, port):
@@ -218,181 +177,13 @@ def check_ping(host, port):
 
 
 def test_config(config_line):
-    """Test single config and return (config, ping_ms, country_code, ru_region_label|None)"""
+    """Test single config and return (config, ping_ms, country_code)"""
     host, port = extract_host_port(config_line)
     if not host or not port:
-        return (config_line, -1, None, None)
+        return (config_line, -1, 'UNKNOWN')
     ping_ms = check_ping(host, port)
-    country = extract_country(config_line)
-    ru_region = extract_ru_region(config_line) if country == 'RU' else None
-    return (config_line, ping_ms, country, ru_region)
-
-
-def generate_s_happ_europe(all_configs):
-    """Generate European part of s-happ.txt: top 10 EU countries by ping"""
-    log_t(f'PHASE 5A: Testing {len(all_configs)} configs for ping and country (EU)...')
-
-    tested = []
-    with ThreadPoolExecutor(max_workers=20) as ex:
-        futures = [ex.submit(test_config, cfg) for cfg in all_configs]
-        for f in as_completed(futures):
-            tested.append(f.result())
-
-    # Group by country (only Europe)
-    by_country = defaultdict(list)
-    for cfg, ping_ms, country, _ru_region in tested:
-        if ping_ms > 0 and country in EUROPEAN_COUNTRIES:
-            by_country[country].append((cfg, ping_ms))
-
-    log_t(f'Found {len(by_country)} European countries with live configs')
-
-    # Sort within each country by ping
-    for cc in by_country:
-        by_country[cc].sort(key=lambda x: x[1])
-
-    # Select top 10 countries by: count (>=3) + avg ping
-    country_stats = []
-    for cc in by_country:
-        if len(by_country[cc]) >= 3:
-            sample = by_country[cc][:5]
-            avg_ping = sum(p for _, p in sample) / len(sample)
-            country_stats.append((cc, len(by_country[cc]), avg_ping))
-
-    country_stats.sort(key=lambda x: (x[2], -x[1]))  # Sort by avg ping, then by count
-    top_10_countries = [cc for cc, _, _ in country_stats[:10]]
-
-    log_t(f'Selected top 10 countries (EU): {", ".join(sorted(top_10_countries))}')
-
-    # Build output
-    output_lines = []
-    for country in sorted(top_10_countries):
-        output_lines.append(f'# {country}')
-        # Take top 3-5 per country
-        for cfg, ping_ms in by_country[country][:5]:
-            output_lines.append(cfg)
-
-    return '\n'.join(output_lines)
-
-
-def _select_top_countries(by_country: dict, required: list[str], max_countries: int = 5):
-    """Helper to select top countries with >=3 configs, keeping required ones if possible"""
-    stats = []
-    for cc, items in by_country.items():
-        if len(items) < 3:
-            continue
-        sample = items[:5]
-        avg_ping = sum(p for _, p in sample) / len(sample)
-        stats.append((cc, len(items), avg_ping))
-
-    # Sort by avg ping, then by count
-    stats.sort(key=lambda x: (x[2], -x[1]))
-
-    selected = []
-    # First, try to include required countries if present
-    for r in required:
-        for cc, _cnt, _avg in stats:
-            if cc == r and cc not in selected:
-                selected.append(cc)
-                break
-
-    # Fill remaining slots
-    for cc, _cnt, _avg in stats:
-        if len(selected) >= max_countries:
-            break
-        if cc not in selected:
-            selected.append(cc)
-
-    return selected
-
-
-def generate_happ_world(all_configs):
-    """Generate world part of s-happ.txt: Russia regions + Asia, Americas, Africa"""
-    log_t(f'PHASE 5B: Testing {len(all_configs)} configs for ping, country, regions (world)...')
-
-    tested = []
-    with ThreadPoolExecutor(max_workers=20) as ex:
-        futures = [ex.submit(test_config, cfg) for cfg in all_configs]
-        for f in as_completed(futures):
-            tested.append(f.result())
-
-    lines = []
-
-    # ---------------- RUSSIA REGIONS ----------------
-    ru_by_region = defaultdict(list)
-    for cfg, ping_ms, country, ru_region in tested:
-        if ping_ms > 0 and country == 'RU' and ru_region:
-            ru_by_region[ru_region].append((cfg, ping_ms))
-
-    for reg in ru_by_region:
-        ru_by_region[reg].sort(key=lambda x: x[1])
-
-    ru_region_stats = []
-    for reg, items in ru_by_region.items():
-        if len(items) < 3:
-            continue
-        sample = items[:5]
-        avg_ping = sum(p for _, p in sample) / len(sample)
-        ru_region_stats.append((reg, len(items), avg_ping))
-
-    # Sort by avg ping, then by count, take up to 5 regions
-    ru_region_stats.sort(key=lambda x: (x[2], -x[1]))
-    selected_ru_regions = [reg for reg, _cnt, _avg in ru_region_stats[:5]]
-
-    for reg in selected_ru_regions:
-        header = reg.lower().replace('_', '-')  # RU-MSK -> ru-msk
-        lines.append(f'# {header}')
-        for cfg, ping_ms in ru_by_region[reg][:5]:
-            lines.append(cfg)
-
-    # ---------------- ASIA ----------------
-    asia_by_country = defaultdict(list)
-    for cfg, ping_ms, country, _ru_region in tested:
-        if ping_ms > 0 and country in ASIA_COUNTRIES:
-            asia_by_country[country].append((cfg, ping_ms))
-
-    for cc in asia_by_country:
-        asia_by_country[cc].sort(key=lambda x: x[1])
-
-    asia_selected = _select_top_countries(asia_by_country, required=['JP', 'KR'], max_countries=5)
-
-    for cc in asia_selected:
-        lines.append(f'# {cc}')
-        for cfg, ping_ms in asia_by_country[cc][:5]:
-            lines.append(cfg)
-
-    # ---------------- AMERICAS ----------------
-    amer_by_country = defaultdict(list)
-    for cfg, ping_ms, country, _ru_region in tested:
-        if ping_ms > 0 and country in AMERICAS_COUNTRIES:
-            amer_by_country[country].append((cfg, ping_ms))
-
-    for cc in amer_by_country:
-        amer_by_country[cc].sort(key=lambda x: x[1])
-
-    amer_selected = _select_top_countries(amer_by_country, required=['US', 'CA'], max_countries=5)
-
-    for cc in amer_selected:
-        lines.append(f'# {cc}')
-        for cfg, ping_ms in amer_by_country[cc][:5]:
-            lines.append(cfg)
-
-    # ---------------- AFRICA ----------------
-    afr_by_country = defaultdict(list)
-    for cfg, ping_ms, country, _ru_region in tested:
-        if ping_ms > 0 and country in AFRICA_COUNTRIES:
-            afr_by_country[country].append((cfg, ping_ms))
-
-    for cc in afr_by_country:
-        afr_by_country[cc].sort(key=lambda x: x[1])
-
-    afr_selected = _select_top_countries(afr_by_country, required=[], max_countries=5)
-
-    for cc in afr_selected:
-        lines.append(f'# {cc}')
-        for cfg, ping_ms in afr_by_country[cc][:5]:
-            lines.append(cfg)
-
-    return '\n'.join(lines)
+    country = extract_country(config_line) if ping_ms > 0 else 'UNKNOWN'
+    return (config_line, ping_ms, country)
 
 
 # === DOWNLOAD ===
@@ -438,26 +229,68 @@ if gh_push('githubmirror/all.txt', content):
 else:
     log_t(f'✗ all.txt FAILED')
 
-# === GENERATE & PUSH s-happ.txt (EU + WORLD) ===
-log_t('PHASE 5: Generating s-happ.txt (Europe + Russia + Asia + Americas + Africa)...')
+# === REGIONAL FILTERING ===
+log_t('PHASE 5: Regional filtering (EC + RU + World)...')
 
-s_happ_eu = generate_s_happ_europe(unique)
-world_part = generate_happ_world(unique)
+tested = []
+with ThreadPoolExecutor(max_workers=20) as ex:
+    futures = [ex.submit(test_config, cfg) for cfg in unique]
+    for f in as_completed(futures):
+        tested.append(f.result())
 
-if s_happ_eu and world_part:
-    s_happ_combined = s_happ_eu + '\n\n' + world_part
-elif s_happ_eu:
-    s_happ_combined = s_happ_eu
-else:
-    s_happ_combined = world_part
+# Группировка по регионам
+ec_configs = []
+ru_configs = []
+world_configs = []
 
-if gh_push('githubmirror/s-happ.txt', s_happ_combined):
-    log_t(f'✓ s-happ.txt: {len(s_happ_combined.encode("utf-8")):,} bytes')
-else:
-    log_t(f'✗ s-happ.txt FAILED')
+for cfg, ping_ms, country in tested:
+    if ping_ms <= 0:
+        continue
+    
+    if country in EC_COUNTRIES:
+        ec_configs.append((cfg, ping_ms))
+    elif country in RU_COUNTRIES:
+        ru_configs.append((cfg, ping_ms))
+    else:
+        world_configs.append((cfg, ping_ms))
+
+# Сортировка по пингу
+ec_configs.sort(key=lambda x: x[1])
+ru_configs.sort(key=lambda x: x[1])
+world_configs.sort(key=lambda x: x[1])
+
+ec_lines = [cfg for cfg, _ in ec_configs[:MAX_CONFIGS_PER_FILE]]
+ru_lines = [cfg for cfg, _ in ru_configs[:MAX_CONFIGS_PER_FILE]]
+world_lines = [cfg for cfg, _ in world_configs[:MAX_CONFIGS_PER_FILE]]
+
+# === PUSH REGIONAL FILES ===
+log_t(f'PHASE 6: Pushing regional files...')
+
+if ec_lines:
+    ec_content = '\n'.join(ec_lines)
+    if gh_push('githubmirror/ec.txt', ec_content):
+        log_t(f'✓ ec.txt: {len(ec_lines)} configs (ЕС, от-10)')
+    else:
+        log_t(f'✗ ec.txt FAILED')
+
+if ru_lines:
+    ru_content = '\n'.join(ru_lines)
+    if gh_push('githubmirror/ru.txt', ru_content):
+        log_t(f'✓ ru.txt: {len(ru_lines)} configs (🔴 обязательный блок RU+KZ+BY+UZ)')
+    else:
+        log_t(f'✗ ru.txt FAILED')
+
+if world_lines:
+    world_content = '\n'.join(world_lines)
+    if gh_push('githubmirror/world.txt', world_content):
+        log_t(f'✓ world.txt: {len(world_lines)} configs (все остальные регионы)')
+    else:
+        log_t(f'✗ world.txt FAILED')
 
 elapsed = time.time() - START
 print(f'\n✅ SUCCESS! Time: {elapsed:.1f}s')
-print(f'📁 Files:')
-print(f'   • all.txt: {len(unique)} configs')
-print(f'   • s-happ.txt: EU + RU regions + Asia/Americas/Africa selection\n')
+print(f'📁 Files generated:')
+print(f'   • all.txt: {len(unique)} configs (полный список)')
+print(f'   • ec.txt: {len(ec_lines)} configs (ЕС, от-10)')
+print(f'   • ru.txt: {len(ru_lines)} configs (🔴 обязательный: RU+KZ+BY+UZ)')
+print(f'   • world.txt: {len(world_lines)} configs (остальные страны)\n')
