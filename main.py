@@ -9,7 +9,7 @@ TOKEN = os.environ.get('MY_TOKEN', '').strip()
 REPO_FULL = os.environ.get('REPO_NAME', 'SEDiK-Bes/goida-vpn-configs').strip()
 
 print('\n' + '='*70)
-print('[INIT] Starting GOIDA VPN v10.1 DEBUG')
+print('[INIT] Starting GOIDA VPN v10.2 SEQUENTIAL')
 print('='*70)
 
 print(f'\n[DEBUG] Token check:')
@@ -205,26 +205,22 @@ def main():
         log_time('This is why all.txt will be empty', 'ERROR')
         sys.exit(1)
     
-    log_time(f'PHASE 3: Pushing {len(source_stats)} files to GitHub...', 'PHASE')
-    with ThreadPoolExecutor(max_workers=10) as executor:
-        futures = {}
-        config_list = list(all_configs)
-        
-        for idx, count in source_stats.items():
-            content = '\n'.join(config_list[:count])
-            futures[executor.submit(gh_push_file, f'githubmirror/{idx}.txt', content, f'update {idx}.txt')] = idx
-        
-        push_success = 0
-        push_fail = 0
-        for future in as_completed(futures):
-            success, status, error = future.result()
-            idx = futures.get(future, '?')
-            if success:
-                push_success += 1
-                log_time(f'Pushed {idx}.txt: HTTP {status} OK', 'OK')
-            else:
-                push_fail += 1
-                log_time(f'Pushed {idx}.txt: HTTP {status} FAIL - {error}', 'ERROR')
+    log_time(f'PHASE 3: Pushing {len(source_stats)} files SEQUENTIALLY to GitHub...', 'PHASE')
+    config_list = list(all_configs)
+    
+    push_success = 0
+    push_fail = 0
+    
+    for idx, count in sorted(source_stats.items()):
+        content = '\n'.join(config_list[:count])
+        success, status, error = gh_push_file(f'githubmirror/{idx}.txt', content, f'update {idx}.txt')
+        if success:
+            push_success += 1
+            log_time(f'Pushed {idx}.txt: HTTP {status} OK', 'OK')
+        else:
+            push_fail += 1
+            log_time(f'Pushed {idx}.txt: HTTP {status} FAIL - {error}', 'ERROR')
+        time.sleep(0.1)
     
     log_time(f'Push complete: {push_success} OK, {push_fail} FAILED', 'STAT')
     
