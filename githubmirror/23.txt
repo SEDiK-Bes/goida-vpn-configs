@@ -1,1 +1,1 @@
-trojan://381f2e86233720eacda26d50e9aa26da@160.16.116.227:1281?sni=www.nintendogames.net&path=/#@Vip_Security join us - 396
+vless://4d7a559b-6379-41a7-9e51-41ef759846aa@77.73.66.83:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=fr1.nfnpx.online&fp=chrome&pbk=ZKhdCZyKSfSS3bFycUzSmYiVldVzJKqT-yDnvxNpzg8&sid=447cc520d1ad145c&spx=%2F&type=tcp&headerType=none#0540%20%7C%20%F0%9F%87%B7%F0%9F%87%BA%20Russia%20%7C%20VLESS%20%7C%20TG%3A%20%40STR_BYPASS
