@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""GOIDA VPN Aggregator v11.0 - 3 file split"""
+"""GOIDA VPN Aggregator v11.1 - Fixed 3 file split"""
 import os, sys, base64, re, time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
@@ -12,7 +12,7 @@ GITHUB_API = 'https://api.github.com'
 START = time.time()
 
 print('\n' + '='*70)
-print('🚀 GOIDA VPN v11.0 - 3 FILE SPLIT')
+print('🚀 GOIDA VPN v11.1 - 3 FILE SPLIT (FIXED)')
 print('='*70 + '\n')
 
 if not TOKEN or not TOKEN.startswith('ghp_'):
@@ -39,7 +39,9 @@ def gh_push(path, content, msg):
         if sha: data['sha'] = sha
         r = requests.put(url, headers=gh_headers(), json=data, timeout=10)
         return (r.status_code in (200, 201), r.status_code)
-    except: return (False, 0)
+    except Exception as e:
+        log_t(f'gh_push ERROR: {e}', 'ERROR')
+        return (False, 0)
 
 SOURCES = [
     'https://raw.githubusercontent.com/sakha1370/OpenRay/refs/heads/main/output/all_valid_proxies.txt',
@@ -97,7 +99,8 @@ def http_get(url, idx):
 
 # === PHASE 1: Download ===
 log_t('PHASE 1: Downloading 25 sources...', 'PHASE')
-configs = set()
+all_configs = []  # LIST, NOT SET - preserve all configs
+
 with ThreadPoolExecutor(max_workers=25) as ex:
     futures = {ex.submit(http_get, url, i): i for i, url in enumerate(SOURCES, 1)}
     ok = 0
@@ -106,11 +109,11 @@ with ThreadPoolExecutor(max_workers=25) as ex:
         if not success or not data: continue
         valids = [l for l in data if is_valid(l)][:150]
         if valids:
-            configs.update(valids)
+            all_configs.extend(valids)  # EXTEND - keep all
             ok += 1
             log_t(f'Source {idx}: {len(valids)} configs ({elapsed:.2f}s)', 'OK')
 
-log_t(f'Downloaded: {ok}/25 sources, {len(configs)} total', 'STAT')
+log_t(f'Downloaded: {ok}/25 sources, {len(all_configs)} total', 'STAT')
 
 # === PHASE 2: SNI ===
 log_t('PHASE 2: SNI sources...', 'PHASE')
@@ -122,38 +125,45 @@ with ThreadPoolExecutor(max_workers=3) as ex:
         if success and data: sni.extend(data)
 
 sni_valids = [l for l in sni if is_valid(l)][:150]
-configs.update(sni_valids)
+all_configs.extend(sni_valids)  # EXTEND - keep all
 log_t(f'SNI: {len(sni_valids)} configs', 'OK')
-log_t(f'TOTAL: {len(configs)} configs', 'STAT')
+log_t(f'TOTAL: {len(all_configs)} configs', 'STAT')
 
-if not configs:
+if not all_configs:
     log_t('ERROR: No configs!', 'ERROR')
     sys.exit(1)
 
-# === PHASE 3: Split into 3 files ===
+# === PHASE 3: Split into 3 files (by LINES, not by count) ===
 log_t('PHASE 3: Splitting into 3 files...', 'PHASE')
-all_list = sorted(list(configs))
-chunk_size = len(all_list) // 3
+
+# Remove duplicates using SET, then back to LIST
+unique_configs = list(set(all_configs))
+unique_configs.sort()  # Sort for consistency
+
+chunk_size = len(unique_configs) // 3
 
 parts = [
-    all_list[:chunk_size],
-    all_list[chunk_size:2*chunk_size],
-    all_list[2*chunk_size:]
+    unique_configs[:chunk_size],
+    unique_configs[chunk_size:2*chunk_size],
+    unique_configs[2*chunk_size:]
 ]
 
 for i, part in enumerate(parts, 1):
     if part:
-        size = len('\n'.join(part).encode('utf-8'))
+        content_str = '\n'.join(part)
+        size = len(content_str.encode('utf-8'))
         log_t(f'Part {i}: {len(part)} configs ({size:,} bytes)', 'INFO')
 
 # === PHASE 4: Push ===
 log_t('PHASE 4: Pushing to GitHub...', 'PHASE')
+push_ok = 0
 for i, part in enumerate(parts, 1):
     if not part: continue
     content = '\n'.join(part)
     path = f'githubmirror/all_{i:03d}.txt'
     success, status = gh_push(path, content, f'update all_{i:03d}.txt')
     if success:
+        push_ok += 1
         log_t(f'Pushed {path}: HTTP {status}', 'OK')
     else:
         log_t(f'FAILED {path}: HTTP {status}', 'ERROR')
@@ -161,14 +171,16 @@ for i, part in enumerate(parts, 1):
 
 # === PHASE 5: Combine into all.txt ===
 log_t('PHASE 5: Creating combined all.txt...', 'PHASE')
-all_content = '\n'.join(all_list)
+all_content = '\n'.join(unique_configs)
 success, status = gh_push('githubmirror/all.txt', all_content, 'update all.txt (combined)')
 if success:
+    push_ok += 1
     log_t(f'all.txt: HTTP {status}', 'OK')
 else:
     log_t(f'all.txt FAILED: HTTP {status}', 'ERROR')
 
 elapsed = time.time() - START
 print(f'\n✅ DONE! Time: {elapsed:.2f}s')
-print(f'📊 Total: {len(all_list)} configs')
-print(f'📁 Files: all.txt + all_001.txt, all_002.txt, all_003.txt\n')
+print(f'📊 Total: {len(unique_configs)} unique configs')
+print(f'📁 Files: all.txt + all_001.txt, all_002.txt, all_003.txt')
+print(f'🎯 Pushed: {push_ok}/4 files\n')
