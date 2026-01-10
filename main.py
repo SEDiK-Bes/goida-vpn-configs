@@ -1,47 +1,20 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""GOIDA VPN Aggregator v11.1 - Fixed 3 file split"""
+"""GOIDA VPN v12.0 FINAL - Split by SIZE, not by COUNT"""
 import os, sys, base64, re, time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 
 TOKEN = os.environ.get('MY_TOKEN', '').strip()
-REPO_FULL = os.environ.get('REPO_NAME', 'SEDiK-Bes/goida-vpn-configs').strip()
-OWNER, REPO = REPO_FULL.split('/')
-GITHUB_API = 'https://api.github.com'
-START = time.time()
-
-print('\n' + '='*70)
-print('🚀 GOIDA VPN v11.1 - 3 FILE SPLIT (FIXED)')
-print('='*70 + '\n')
-
 if not TOKEN or not TOKEN.startswith('ghp_'):
     print('ERROR: Invalid MY_TOKEN'); sys.exit(1)
 
-def log_t(msg, lv='OK'):
-    print(f'[{time.time()-START:6.2f}s] [{lv:5}] {msg}')
+START = time.time()
+print('\n' + '='*70)
+print('🔥 GOIDA VPN v12.0 FINAL - SPLIT BY SIZE')
+print('='*70 + '\n')
 
-def gh_headers():
-    return {'Authorization': f'token {TOKEN}', 'Accept': 'application/vnd.github+json'}
-
-def gh_get_sha(path):
-    try:
-        r = requests.get(f'{GITHUB_API}/repos/{OWNER}/{REPO}/contents/{path}', headers=gh_headers(), timeout=5)
-        if r.status_code == 200: return r.json()['sha']
-    except: pass
-    return None
-
-def gh_push(path, content, msg):
-    try:
-        url = f'{GITHUB_API}/repos/{OWNER}/{REPO}/contents/{path}'
-        sha = gh_get_sha(path)
-        data = {'message': msg, 'content': base64.b64encode(content.encode('utf-8')).decode('ascii')}
-        if sha: data['sha'] = sha
-        r = requests.put(url, headers=gh_headers(), json=data, timeout=10)
-        return (r.status_code in (200, 201), r.status_code)
-    except Exception as e:
-        log_t(f'gh_push ERROR: {e}', 'ERROR')
-        return (False, 0)
+def log_t(msg):
+    print(f'[{time.time()-START:6.2f}s] {msg}')
 
 SOURCES = [
     'https://raw.githubusercontent.com/sakha1370/OpenRay/refs/heads/main/output/all_valid_proxies.txt',
@@ -90,97 +63,117 @@ def is_valid(line):
 
 def http_get(url, idx):
     try:
-        start = time.time()
         r = requests.get(url, timeout=8)
         if r.status_code == 200:
-            return (idx, [l.strip() for l in r.text.splitlines() if l.strip()], time.time()-start, True)
+            return (idx, [l.strip() for l in r.text.splitlines() if l.strip()], True)
     except: pass
-    return (idx, [], 0, False)
+    return (idx, [], False)
+
+def gh_headers():
+    return {'Authorization': f'token {TOKEN}', 'Accept': 'application/vnd.github+json'}
+
+def gh_push(path, content):
+    try:
+        url = f'https://api.github.com/repos/SEDiK-Bes/goida-vpn-configs/contents/{path}'
+        r = requests.get(url, headers=gh_headers(), timeout=5)
+        sha = None
+        if r.status_code == 200:
+            sha = r.json()['sha']
+        data = {'message': f'update {path}', 'content': base64.b64encode(content.encode('utf-8')).decode('ascii')}
+        if sha: data['sha'] = sha
+        r = requests.put(url, headers=gh_headers(), json=data, timeout=10)
+        return r.status_code in (200, 201)
+    except:
+        return False
 
 # === PHASE 1: Download ===
-log_t('PHASE 1: Downloading 25 sources...', 'PHASE')
-all_configs = []  # LIST, NOT SET - preserve all configs
-
+log_t('PHASE 1: Downloading sources...')
+all_configs = []
 with ThreadPoolExecutor(max_workers=25) as ex:
     futures = {ex.submit(http_get, url, i): i for i, url in enumerate(SOURCES, 1)}
-    ok = 0
+    ok_count = 0
     for f in as_completed(futures):
-        idx, data, elapsed, success = f.result()
-        if not success or not data: continue
-        valids = [l for l in data if is_valid(l)][:150]
-        if valids:
-            all_configs.extend(valids)  # EXTEND - keep all
-            ok += 1
-            log_t(f'Source {idx}: {len(valids)} configs ({elapsed:.2f}s)', 'OK')
+        idx, data, success = f.result()
+        if success and data:
+            valids = [l for l in data if is_valid(l)][:150]
+            if valids:
+                all_configs.extend(valids)
+                ok_count += 1
+                log_t(f'✓ Source {idx}: {len(valids)} configs')
 
-log_t(f'Downloaded: {ok}/25 sources, {len(all_configs)} total', 'STAT')
+log_t(f'Downloaded: {ok_count}/25 sources, {len(all_configs)} total')
 
 # === PHASE 2: SNI ===
-log_t('PHASE 2: SNI sources...', 'PHASE')
+log_t('PHASE 2: SNI sources...')
 sni = []
 with ThreadPoolExecutor(max_workers=3) as ex:
-    futures = {ex.submit(http_get, url, i): i for i, url in enumerate(SNI_SOURCES, 26)}
+    futures = {ex.submit(http_get, url, i): i for i, url in enumerate(SNI_SOURCES)}
     for f in as_completed(futures):
-        idx, data, _, success = f.result()
+        idx, data, success = f.result()
         if success and data: sni.extend(data)
 
 sni_valids = [l for l in sni if is_valid(l)][:150]
-all_configs.extend(sni_valids)  # EXTEND - keep all
-log_t(f'SNI: {len(sni_valids)} configs', 'OK')
-log_t(f'TOTAL: {len(all_configs)} configs', 'STAT')
+all_configs.extend(sni_valids)
+log_t(f'SNI: {len(sni_valids)} configs')
+log_t(f'TOTAL before dedup: {len(all_configs)} configs')
 
 if not all_configs:
-    log_t('ERROR: No configs!', 'ERROR')
-    sys.exit(1)
+    log_t('ERROR: No configs collected!'); sys.exit(1)
 
-# === PHASE 3: Split into 3 files (by LINES, not by count) ===
-log_t('PHASE 3: Splitting into 3 files...', 'PHASE')
+# === PHASE 3: Dedup & Sort ===
+log_t('PHASE 3: Deduplicating...')
+unique = sorted(list(set(all_configs)))
+log_t(f'Unique: {len(unique)} configs')
 
-# Remove duplicates using SET, then back to LIST
-unique_configs = list(set(all_configs))
-unique_configs.sort()  # Sort for consistency
+# === PHASE 4: Split by SIZE (not count) ===
+log_t('PHASE 4: Splitting by SIZE (2.5MB per file)...')
+MAX_SIZE = 2500000  # 2.5MB max per file
+parts = []
+current = []
+current_size = 0
 
-chunk_size = len(unique_configs) // 3
+for config in unique:
+    config_bytes = len(config.encode('utf-8')) + 1  # +1 for newline
+    if current_size + config_bytes > MAX_SIZE and current:
+        parts.append(current)
+        current = []
+        current_size = 0
+    current.append(config)
+    current_size += config_bytes
 
-parts = [
-    unique_configs[:chunk_size],
-    unique_configs[chunk_size:2*chunk_size],
-    unique_configs[2*chunk_size:]
-]
+if current:
+    parts.append(current)
 
-for i, part in enumerate(parts, 1):
-    if part:
-        content_str = '\n'.join(part)
-        size = len(content_str.encode('utf-8'))
-        log_t(f'Part {i}: {len(part)} configs ({size:,} bytes)', 'INFO')
+for i, p in enumerate(parts, 1):
+    size = len('\n'.join(p).encode('utf-8'))
+    log_t(f'Part {i}: {len(p)} configs ({size:,} bytes)')
 
-# === PHASE 4: Push ===
-log_t('PHASE 4: Pushing to GitHub...', 'PHASE')
+# === PHASE 5: Push to GitHub ===
+log_t('PHASE 5: Pushing to GitHub...')
 push_ok = 0
-for i, part in enumerate(parts, 1):
-    if not part: continue
-    content = '\n'.join(part)
+for i, p in enumerate(parts, 1):
     path = f'githubmirror/all_{i:03d}.txt'
-    success, status = gh_push(path, content, f'update all_{i:03d}.txt')
-    if success:
+    content = '\n'.join(p)
+    if gh_push(path, content):
+        size = len(content.encode('utf-8'))
+        log_t(f'✓ {path} ({size:,} bytes)')
         push_ok += 1
-        log_t(f'Pushed {path}: HTTP {status}', 'OK')
     else:
-        log_t(f'FAILED {path}: HTTP {status}', 'ERROR')
-    time.sleep(0.5)
+        log_t(f'✗ {path} FAILED')
+    time.sleep(0.3)
 
-# === PHASE 5: Combine into all.txt ===
-log_t('PHASE 5: Creating combined all.txt...', 'PHASE')
-all_content = '\n'.join(unique_configs)
-success, status = gh_push('githubmirror/all.txt', all_content, 'update all.txt (combined)')
-if success:
+# all.txt combined
+log_t('PHASE 6: Creating all.txt...')
+all_content = '\n'.join(unique)
+if gh_push('githubmirror/all.txt', all_content):
+    size = len(all_content.encode('utf-8'))
+    log_t(f'✓ all.txt ({size:,} bytes)')
     push_ok += 1
-    log_t(f'all.txt: HTTP {status}', 'OK')
 else:
-    log_t(f'all.txt FAILED: HTTP {status}', 'ERROR')
+    log_t(f'✗ all.txt FAILED')
 
 elapsed = time.time() - START
-print(f'\n✅ DONE! Time: {elapsed:.2f}s')
-print(f'📊 Total: {len(unique_configs)} unique configs')
-print(f'📁 Files: all.txt + all_001.txt, all_002.txt, all_003.txt')
-print(f'🎯 Pushed: {push_ok}/4 files\n')
+print(f'\n✅ SUCCESS! Time: {elapsed:.1f}s')
+print(f'📊 Total: {len(unique)} unique configs')
+print(f'📁 Files: {len(parts)} split files + all.txt')
+print(f'✓ Pushed: {push_ok}/{len(parts)+1} files\n')
