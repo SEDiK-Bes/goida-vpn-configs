@@ -9,7 +9,7 @@ TOKEN = os.environ.get('MY_TOKEN', '').strip()
 REPO_FULL = os.environ.get('REPO_NAME', 'SEDiK-Bes/goida-vpn-configs').strip()
 
 print('\n' + '='*70)
-print('[INIT] Starting GOIDA VPN v10.4 DIRECT URL VERIFICATION')
+print('[INIT] Starting GOIDA VPN v10.5 FINAL')
 print('='*70)
 
 print(f'\n[DEBUG] Token check:')
@@ -128,16 +128,19 @@ def gh_push_file(path, content, message):
     except Exception as e:
         return (False, 0, str(e))
 
-def gh_verify_all_txt():
+def gh_verify_all_txt_improved():
+    """
+    Пропускаем Base64, просто проверяем размер файла
+    и считаем реальные строки из RAW URL
+    """
     try:
-        # Используем RAW URL вместо API для надёжной проверки
         raw_url = f'{GITHUB_RAW}/githubmirror/all.txt'
         r = requests.get(raw_url, timeout=10)
         if r.status_code == 200:
             content = r.text
+            file_size = len(content.encode('utf-8'))
             lines = [l.strip() for l in content.split('\n') if l.strip()]
             config_count = len(lines)
-            file_size = len(content.encode('utf-8'))
             return (True, config_count, file_size)
         else:
             log_time(f'RAW URL returned HTTP {r.status_code}', 'WARN')
@@ -208,7 +211,6 @@ def main():
     
     if len(all_configs) == 0:
         log_time('CRITICAL: No configs collected! all_configs is empty!', 'ERROR')
-        log_time('This is why all.txt will be empty', 'ERROR')
         sys.exit(1)
     
     log_time(f'PHASE 3: Pushing {len(source_stats)} files SEQUENTIALLY to GitHub...', 'PHASE')
@@ -247,8 +249,8 @@ def main():
         sys.exit(1)
     
     time.sleep(1)
-    log_time('PHASE 5: Verifying all.txt on GitHub (RAW URL)...', 'PHASE')
-    success, config_count, file_size = gh_verify_all_txt()
+    log_time('PHASE 5: Verifying all.txt on GitHub...', 'PHASE')
+    success, config_count, file_size = gh_verify_all_txt_improved()
     if success and config_count > 0:
         elapsed = time.time() - START_TIME
         log_time(f'VERIFIED: {config_count} configs, {file_size} bytes', 'OK')
@@ -259,7 +261,6 @@ def main():
         print('='*70 + '\n')
     else:
         log_time(f'VERIFICATION FAILED! config_count={config_count}', 'ERROR')
-        log_time(f'Trying RAW URL: {GITHUB_RAW}/githubmirror/all.txt', 'INFO')
         sys.exit(1)
 
 if __name__ == '__main__':
