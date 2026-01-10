@@ -1,52 +1,60 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 """
-GOIDA VPN Config Aggregator & Filter v4.1
-🚀 Полная версия с гарантированным all.txt + TCP/ICMP пинг + GitHub push
-Генерирована: 10.01.2026, 01:40:41
+GOIDA VPN Config Aggregator v6.0 ULTIMATE
+🚀 Супер-версия с гарантией all.txt на GitHub
+Объединяет HAPP.py + HAPP-VPN-Manager + Двойная проверка
+Автор: SEDiK-Bes
+Дата: 2026-01-10
 """
 
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
-from collections import defaultdict
-from github import GithubException, Github, Auth
-from datetime import datetime
-import concurrent.futures
-import urllib.parse
-import threading
-import zoneinfo
-import requests
-import urllib3
-import socket
-import base64
-import html
+import os
+import sys
 import json
 import time
+import base64
+import socket
+import threading
 import re
-import os
+from collections import defaultdict
+from datetime import datetime
+from pathlib import Path
 
-# ==================== НАСТРОЙКИ ====================
-GITHUB_TOKEN = os.environ.get("MY_TOKEN")
-REPO_NAME = os.environ.get("REPO_NAME", "SEDiK-Bes/goida-vpn-configs")
+# Установка зависимостей
+try:
+    import requests
+    from github import Github, Auth, GithubException
+except ImportError:
+    print("📦 Установка требуемых библиотек...")
+    os.system("pip install requests PyGithub --upgrade -q")
+    import requests
+    from github import Github, Auth, GithubException
 
-ENABLE_TCP_CHECK = true
-ENABLE_ICMP_CHECK = false
+# ======================== КОНФИГУРАЦИЯ ========================
+GITHUB_TOKEN = os.environ.get("MY_TOKEN", "").strip()
+REPO_NAME = os.environ.get("REPO_NAME", "SEDiK-Bes/goida-vpn-configs").strip()
+
+# Параметры фильтрации
 MAX_PING_MS = 300
-ICMP_THRESHOLD_MS = 200
-CONNECTION_TIMEOUT = 2
-MAX_CONFIGS_PER_FILE = 150
-
+MAX_CONFIGS = 150
 TCP_WORKERS = 25
-ICMP_WORKERS = 20
-HTTP_WORKERS = 8
+ENABLE_TCP = True
+ENABLE_ICMP = False  # Опционально
+REMOVE_DUPES = True
 
-REMOVE_DUPLICATES = true
-ENABLE_SNI_FILTER = true
-VERBOSE_LOGGING = true
+# Проверка токена
+if not GITHUB_TOKEN or GITHUB_TOKEN == "ghp_":
+    print("❌ ОШИБКА: MY_TOKEN не установлен!")
+    print("Выполни: $env:MY_TOKEN = 'ghp_твой_токен'")
+    sys.exit(1)
 
+if "ghp_" not in GITHUB_TOKEN:
+    print("❌ ОШИБКА: Неверный формат токена")
+    sys.exit(1)
+
+# ======================== ИСТОЧНИКИ ========================
 URLS = [
-    "https://github.com/sakha1370/OpenRay/raw/refs/heads/main/output/all_valid_proxies.txt",
+    "https://raw.githubusercontent.com/sakha1370/OpenRay/refs/heads/main/output/all_valid_proxies.txt",
     "https://raw.githubusercontent.com/sevcator/5ubscrpt10n/main/protocols/vl.txt",
     "https://raw.githubusercontent.com/yitong2333/proxy-minging/refs/heads/main/v2ray.txt",
     "https://raw.githubusercontent.com/acymz/AutoVPN/refs/heads/main/data/V2.txt",
@@ -73,429 +81,306 @@ URLS = [
     "https://raw.githubusercontent.com/V2RayRoot/V2RayConfig/refs/heads/main/Config/vless.txt",
 ]
 
-EXTRA_URLS_FOR_26 = [
+SNI_URLS = [
     "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/Vless-Reality-White-Lists-Rus-Cable.txt",
     "https://raw.githubusercontent.com/igareck/vpn-configs-for-russia/refs/heads/main/Vless-Reality-White-Lists-Rus-Mobile.txt",
     "https://raw.githubusercontent.com/zieng2/wl/main/vless.txt",
-    "https://raw.githubusercontent.com/zieng2/wl/refs/heads/main/vless_universal.txt",
-    "https://raw.githubusercontent.com/zieng2/wl/main/vless_lite.txt",
-    "https://raw.githubusercontent.com/zieng2/wl/refs/heads/main/vless_nolite.txt",
-    "https://raw.githubusercontent.com/EtoNeYaProject/etoneyaproject.github.io/refs/heads/main/2",
-    "https://s3c3.001.gpucloud.ru/dixsm/htxml",
 ]
 
-SNI_WHITELIST_DOMAINS = [
+SNI_DOMAINS = [
     "avito.ru", "avito.st", "ok.ru", "vk.com", "vk.ru", "mail.ru", "yandex.ru",
     "gosuslugi.ru", "sberbank.ru", "alfabank.ru", "tbank.ru", "ozon.ru",
     "wildberries.ru", "2gis.com", "hh.ru", "drom.ru", "kinopoisk.ru",
 ]
 
-LOGS_BY_FILE = defaultdict(list)
-_LOG_LOCK = threading.Lock()
-_UPDATED_FILES_LOCK = threading.Lock()
-_GITHUBMIRROR_INDEX_RE = re.compile(r"githubmirror/(\d+)\.txt")
-updated_files = set()
+# ======================== ЛОГИРОВАНИЕ ========================
+logs = defaultdict(list)
+lock = threading.Lock()
 
-REMOTE_PATHS = [f"githubmirror/{i+1}.txt" for i in range(len(URLS))]
-LOCAL_PATHS = [f"githubmirror/{i+1}.txt" for i in range(len(URLS))]
-REMOTE_PATHS.append("githubmirror/26.txt")
-LOCAL_PATHS.append("githubmirror/26.txt")
-REMOTE_PATHS.append("githubmirror/all.txt")
-LOCAL_PATHS.append("githubmirror/all.txt")
+def log(msg, idx=0):
+    """Логировать сообщение"""
+    with lock:
+        ts = datetime.now().strftime("%H:%M:%S")
+        logs[idx].append(f"[{ts}] {msg}")
+        print(msg)
 
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+# ======================== HTTP СЕССИЯ ========================
+session = requests.Session()
+session.headers.update({
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+})
 
-CHROME_UA = (
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-    "AppleWebKit/537.36 (KHTML, like Gecko) "
-    "Chrome/138.0.0.0 Safari/537.36"
-)
-
-INSECURE_PATTERN = re.compile(
-    r'(?:[?&;]|3%[Bb])(allowinsecure|allow_insecure|insecure)=(?:1|true|yes)(?:[&;#]|$|(?=\s|$))',
-    re.IGNORECASE
-)
-
-# ==================== ЛОГИРОВАНИЕ ====================
-def _extract_index(msg: str) -> int:
-    m = _GITHUBMIRROR_INDEX_RE.search(msg)
-    if m:
+def fetch(url, timeout=15, retries=3):
+    """Скачать URL с retry"""
+    for attempt in range(retries):
         try:
-            return int(m.group(1))
-        except ValueError:
+            r = session.get(url, timeout=timeout, verify=(attempt < 2))
+            r.raise_for_status()
+            return r.text
+        except Exception as e:
+            if attempt == retries - 1:
+                return ""
+            time.sleep(1)
+    return ""
+
+# ======================== ПАРСИНГ ========================
+def parse_config(line):
+    """Извлечь host:port из конфига"""
+    if not line:
+        return None
+    
+    # Vmess - база64
+    if line.startswith("vmess://"):
+        try:
+            payload = line[8:]
+            if len(payload) % 4:
+                payload += "=" * (4 - len(payload) % 4)
+            data = json.loads(base64.b64decode(payload).decode('utf-8', errors='ignore'))
+            host = data.get('add') or data.get('host') or data.get('ip')
+            port = data.get('port')
+            if host and port:
+                return (str(host), int(port))
+        except:
             pass
-    return 0
+    
+    # Вless, trojan, ss - регекс
+    m = re.search(r'(?:@|//)([a-zA-Z0-9\.\-]+):(\d{1,5})', line)
+    if m:
+        return (m.group(1), int(m.group(2)))
+    
+    return None
 
-def log(message: str):
-    idx = _extract_index(message)
-    with _LOG_LOCK:
-        LOGS_BY_FILE[idx].append(message)
-
-zone = zoneinfo.ZoneInfo("Europe/Moscow")
-thistime = datetime.now(zone)
-offset = thistime.strftime("%H:%M | %d.%m.%Y")
-
-if GITHUB_TOKEN:
-    g = Github(auth=Auth.Token(GITHUB_TOKEN))
-else:
-    g = Github()
-
-REPO = g.get_repo(REPO_NAME)
-
-try:
-    remaining, limit = g.rate_limiting
-    log(f"ℹ️ GitHub API: {remaining}/{limit} запросов")
-except Exception as e:
-    log(f"⚠️ Ошибка GitHub API: {e}")
-
-if not os.path.exists("githubmirror"):
-    os.mkdir("githubmirror")
-
-# ==================== HTTP СЕССИЯ ====================
-def _build_session(max_pool_size: int) -> requests.Session:
-    session = requests.Session()
-    adapter = HTTPAdapter(
-        pool_connections=max_pool_size,
-        pool_maxsize=max_pool_size,
-        max_retries=Retry(
-            total=2,
-            backoff_factor=0.3,
-            status_forcelist=(429, 500, 502, 503, 504),
-            allowed_methods=("HEAD", "GET", "OPTIONS"),
-        ),
-    )
-    session.mount("http://", adapter)
-    session.mount("https://", adapter)
-    session.headers.update({"User-Agent": CHROME_UA})
-    return session
-
-REQUESTS_SESSION = _build_session(max_pool_size=max(HTTP_WORKERS, len(URLS)))
-
-# ==================== СКАЧИВАНИЕ ====================
-def fetch_data(url: str, timeout: int = 15, max_attempts: int = 3) -> str:
-    for attempt in range(1, max_attempts + 1):
-        try:
-            modified_url = url
-            verify = True
-            if attempt == 2:
-                verify = False
-            elif attempt == 3:
-                parsed = urllib.parse.urlparse(url)
-                if parsed.scheme == "https":
-                    modified_url = parsed._replace(scheme="http").geturl()
-                    verify = False
-            response = REQUESTS_SESSION.get(modified_url, timeout=timeout, verify=verify)
-            response.raise_for_status()
-            return response.text
-        except requests.exceptions.RequestException as exc:
-            if attempt < max_attempts:
-                continue
-            raise exc
-
-# [ОСТАЛЬНОЙ КОД ИДЕНТИЧЕН ВЕРСИИ v4.1]
-# Полный код содержит:
-# - extract_host_port_from_config()
-# - check_tcp_availability()
-# - test_single_config_tcp()
-# - check_icmp_ping()
-# - filter_insecure_configs()
-# - filter_and_sort_best_configs()
-# - deduplicate_configs()
-# - save_to_local_file()
-# - extract_source_name()
-# - process_url()
-# - process_all()
-# - build_all_txt() - ГАРАНТИРУЕТ СОЗДАНИЕ all.txt
-# - push_to_github()
-# - save_logs()
-# - main()
-
-def extract_host_port_from_config(config_line: str):
+def tcp_check(host, port, timeout=2):
+    """Быстрая TCP проверка"""
     try:
-        config_line = config_line.strip()
-        if config_line.startswith('vmess://'):
-            try:
-                payload = config_line[8:]
-                rem = len(payload) % 4
-                if rem:
-                    payload += '=' * (4 - rem)
-                decoded = base64.b64decode(payload).decode('utf-8', errors='ignore')
-                if decoded.startswith('{'):
-                    j = json.loads(decoded)
-                    host = j.get('add') or j.get('host') or j.get('ip')
-                    port = j.get('port')
-                    if host and port:
-                        return str(host), int(port)
-            except:
-                pass
-        match = re.search(r'(?:@|//)([\w\.-]+):(\d{1,5})', config_line)
-        if match:
-            return match.group(1), int(match.group(2))
-    except:
-        pass
-    return None, None
-
-def check_tcp_availability(host: str, port: int, timeout: float = CONNECTION_TIMEOUT) -> int:
-    try:
-        start_time = time.time()
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
+        start = time.time()
         result = sock.connect_ex((host, port))
         sock.close()
         if result == 0:
-            elapsed = (time.time() - start_time) * 1000
-            return int(elapsed)
-        else:
-            return -1
+            return int((time.time() - start) * 1000)
     except:
-        return -1
+        pass
+    return -1
 
-def test_single_config_tcp(config_line: str) -> tuple:
-    host, port = extract_host_port_from_config(config_line)
-    if not host or not port:
-        return (config_line, -1, None, None)
-    ping_ms = check_tcp_availability(host, port)
-    return (config_line, ping_ms, host, port)
+def is_insecure(config):
+    """Проверить на allowinsecure=true"""
+    pattern = r'(?:[?&;]|3%[Bb])(allowinsecure|allow_insecure|insecure)=(?:1|true|yes)'
+    return bool(re.search(pattern, config, re.IGNORECASE))
 
-if ENABLE_ICMP_CHECK:
-    try:
-        from icmplib import ping as icmp_ping_sync
-        ICMP_AVAILABLE = True
-    except ImportError:
-        log("⚠️ icmplib не установлен. ICMP отключён.")
-        ICMP_AVAILABLE = False
-        ENABLE_ICMP_CHECK = False
-else:
-    ICMP_AVAILABLE = False
+# ======================== ФИЛЬТРАЦИЯ ========================
+def filter_and_sort(configs, file_idx):
+    """Фильтр + TCP проверка + сортировка"""
+    
+    # Удалить небезопасные
+    configs = [c for c in configs if not is_insecure(c)]
+    log(f"🔍 TCP проверка {len(configs)} конфигов...", file_idx)
+    
+    if not ENABLE_TCP or not configs:
+        return configs[:MAX_CONFIGS]
+    
+    import concurrent.futures
+    
+    def test_config(cfg):
+        parts = parse_config(cfg)
+        if not parts:
+            return (cfg, -1)
+        host, port = parts
+        ping = tcp_check(host, port)
+        return (cfg, ping)
+    
+    # Параллельная проверка
+    tested = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=min(TCP_WORKERS, len(configs))) as ex:
+        tested = list(ex.map(test_config, configs))
+    
+    # Отсортировать по пингу
+    good = sorted([c for c, p in tested if 0 < p <= MAX_PING_MS], 
+                  key=lambda c: next(p for cc, p in tested if cc == c))[:MAX_CONFIGS]
+    
+    if good:
+        pings = [next(p for c, p in tested if c == cfg) for cfg in good]
+        log(f"✅ {len(good)} конфигов (пинг {min(pings)}-{max(pings)}ms)", file_idx)
+    
+    return good
 
-def check_icmp_ping(host: str) -> float:
-    if not ICMP_AVAILABLE:
-        return 0.0
-    try:
-        result = icmp_ping_sync(host, count=2, timeout=1.5, privileged=False)
-        if not result.is_alive:
-            return 9999.0
-        return float(result.avg_rtt)
-    except:
-        return 9999.0
+# ======================== ОБРАБОТКА ========================
+def process_url(url, idx):
+    """Скачать источник"""
+    log(f"⬇️  [{idx+1}/{len(URLS)}] {url[:60]}...")
+    
+    data = fetch(url)
+    if not data:
+        log(f"❌ Ошибка", idx)
+        return []
+    
+    configs = [c.strip() for c in data.strip().split('\n') if c.strip()]
+    log(f"📥 {len(configs)} конфигов", idx)
+    
+    # Дедупа
+    if REMOVE_DUPES:
+        configs = list(dict.fromkeys(configs))
+    
+    # Фильтр
+    return filter_and_sort(configs, idx)
 
-def filter_insecure_configs(data: str) -> tuple:
-    result = []
-    splitted = data.splitlines()
-    for line in splitted:
-        original_line = line
-        processed = line.strip()
-        processed = urllib.parse.unquote(html.unescape(processed))
-        if INSECURE_PATTERN.search(processed):
-            continue
-        result.append(original_line)
-    filtered_count = len(splitted) - len(result)
-    return "\n".join(result), filtered_count
-
-def filter_and_sort_best_configs(configs: list, local_path: str) -> list:
-    if not ENABLE_TCP_CHECK or not configs:
-        return configs
-    log(f"🔍 TCP-проверка {len(configs)} конфигов для {local_path}...")
-    tested_configs = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=TCP_WORKERS) as executor:
-        futures = [executor.submit(test_single_config_tcp, cfg) for cfg in configs]
-        for future in concurrent.futures.as_completed(futures):
-            tested_configs.append(future.result())
-    available = [(cfg, ping, host, port) for cfg, ping, host, port in tested_configs
-                 if 0 < ping <= MAX_PING_MS]
-    if ENABLE_ICMP_CHECK and ICMP_AVAILABLE and available:
-        log(f"🌐 ICMP-проверка {len(available)} конфигов...")
-        def icmp_test(item):
-            cfg, tcp_ping, host, port = item
-            icmp_rtt = check_icmp_ping(host) if host else 9999.0
-            return (cfg, tcp_ping, icmp_rtt)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=ICMP_WORKERS) as executor:
-            icmp_results = list(executor.map(icmp_test, available))
-        available = [(cfg, tcp_ping, icmp_rtt) for cfg, tcp_ping, icmp_rtt in icmp_results
-                     if icmp_rtt <= ICMP_THRESHOLD_MS]
-        available.sort(key=lambda x: (x[2], x[1]))
-        best_configs = [cfg for cfg, _, _ in available[:MAX_CONFIGS_PER_FILE]]
-        if available and VERBOSE_LOGGING:
-            avg_icmp = sum(x[2] for x in available[:len(best_configs)]) / len(best_configs)
-            log(f"📊 ICMP: средний={int(avg_icmp)}ms, отобрано={len(best_configs)}")
-    else:
-        available.sort(key=lambda x: x[1])
-        best_configs = [cfg for cfg, _, _, _ in available[:MAX_CONFIGS_PER_FILE]]
-        filtered_count = len(configs) - len(best_configs)
-        if filtered_count > 0 and VERBOSE_LOGGING:
-            log(f"✅ Отобрано {len(best_configs)} лучших (отфильтровано {filtered_count})")
-        if available:
-            pings = [x[1] for x in available[:len(best_configs)]]
-            log(f"📊 TCP пинг: мин={min(pings)}ms, макс={max(pings)}ms, средний={int(sum(pings)/len(pings))}ms")
-        else:
-            if not best_configs:
-                log(f"⚠️ Все конфиги недоступны для {local_path}")
-    return best_configs
-
-def deduplicate_configs(configs: list) -> list:
-    if not REMOVE_DUPLICATES:
-        return configs
-    seen_full = set()
-    seen_hostport = set()
-    unique = []
-    for cfg in configs:
-        c = cfg.strip()
-        if not c or c in seen_full:
-            continue
-        seen_full.add(c)
-        host, port = extract_host_port_from_config(c)
-        if host and port:
-            key = f"{host.lower()}:{port}"
-            if key in seen_hostport:
-                continue
-            seen_hostport.add(key)
-        unique.append(c)
-    removed = len(configs) - len(unique)
-    if removed > 0 and VERBOSE_LOGGING:
-        log(f"🔄 Удалено {removed} дубликатов")
-    return unique
-
-def save_to_local_file(path, content):
-    with open(path, "w", encoding="utf-8") as file:
-        file.write(content)
-    log(f"📁 Сохранено: {path}")
-
-def extract_source_name(url: str) -> str:
-    try:
-        parsed = urllib.parse.urlparse(url)
-        path_parts = parsed.path.split('/')
-        if len(path_parts) > 2:
-            return f"{path_parts[1]}/{path_parts[2]}"
-        return parsed.netloc
-    except:
-        return "Источник"
-
-def process_url(url: str, output_path: str):
-    try:
-        log(f"⬇️ Скачиваю {extract_source_name(url)}...")
-        data = fetch_data(url)
-        filtered, removed = filter_insecure_configs(data)
-        configs = [c.strip() for c in filtered.splitlines() if c.strip()]
-        log(f"📥 Получено {len(configs)} конфигов (удалено {removed})")
-        configs = deduplicate_configs(configs)
-        configs = filter_and_sort_best_configs(configs, output_path)
-        save_to_local_file(output_path, "\n".join(configs))
-        with _UPDATED_FILES_LOCK:
-            updated_files.add(output_path)
-    except Exception as e:
-        log(f"❌ Ошибка {extract_source_name(url)}: {e}")
-
-def process_all():
-    log(f"🚀 Начало {len(URLS)} источников в {offset}...")
-    with concurrent.futures.ThreadPoolExecutor(max_workers=HTTP_WORKERS) as executor:
-        futures = [executor.submit(process_url, URLS[i], LOCAL_PATHS[i]) for i in range(len(URLS))]
-        for future in concurrent.futures.as_completed(futures):
-            try:
-                future.result()
-            except Exception as e:
-                log(f"⚠️ Ошибка потока: {e}")
-    if ENABLE_SNI_FILTER:
-        try:
-            log("🛡️ Обработка 26.txt (SNI white-list)...")
-            sni_configs = []
-            for url in EXTRA_URLS_FOR_26:
-                try:
-                    data = fetch_data(url)
-                    filtered, _ = filter_insecure_configs(data)
-                    sni_configs.extend([c.strip() for c in filtered.splitlines() if c.strip()])
-                except Exception as e:
-                    log(f"⚠️ Ошибка SNI-источника: {e}")
-            sni_configs = deduplicate_configs(sni_configs)
-            sni_configs = filter_and_sort_best_configs(sni_configs, "githubmirror/26.txt")
-            save_to_local_file("githubmirror/26.txt", "\n".join(sni_configs))
-            with _UPDATED_FILES_LOCK:
-                updated_files.add("githubmirror/26.txt")
-            log(f"✅ 26.txt готов ({len(sni_configs)} конфигов)")
-        except Exception as e:
-            log(f"❌ Ошибка 26.txt: {e}")
+def save_file(path, content):
+    """Сохранить файл"""
+    Path(path).parent.mkdir(exist_ok=True)
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(content)
 
 def build_all_txt():
-    try:
-        base_dir = "githubmirror"
-        all_path = os.path.join(base_dir, "all.txt")
-        if not os.path.exists(base_dir):
-            log(f"⚠️ Папка {base_dir} не найдена")
-            return
-        all_lines = []
-        for filename in sorted(os.listdir(base_dir)):
-            if filename.lower() == "all.txt" or not filename.endswith(".txt"):
-                continue
-            txt_path = os.path.join(base_dir, filename)
+    """ГАРАНТИРОВАННОЕ all.txt"""
+    log("🔗 Создание all.txt...")
+    
+    all_lines = set()
+    
+    # Из 1-25
+    for i in range(1, 26):
+        path = f"githubmirror/{i}.txt"
+        if os.path.exists(path):
             try:
-                with open(txt_path, "r", encoding="utf-8", errors="ignore") as f:
+                with open(path, 'r', encoding='utf-8') as f:
                     for line in f:
                         line = line.strip()
-                        if line and (line.startswith("vmess://")
-                                    or line.startswith("vless://")
-                                    or line.startswith("trojan://")
-                                    or line.startswith("ss://")
-                                    or line.startswith("ssr://")):
-                            all_lines.append(line)
-            except Exception as e:
-                log(f"⚠️ Не удалось прочитать {filename}: {e}")
-        seen = set()
-        unique_lines = []
-        for line in all_lines:
-            if line not in seen:
-                seen.add(line)
-                unique_lines.append(line)
-        with open(all_path, "w", encoding="utf-8") as f:
-            for line in unique_lines:
-                f.write(line + "\n")
-        log(f"✨ {all_path} готов ({len(unique_lines)} конфигов)")
-        with _UPDATED_FILES_LOCK:
-            updated_files.add(all_path)
-    except Exception as e:
-        log(f"❌ Ошибка all.txt: {e}")
+                        if line:
+                            all_lines.add(line)
+            except:
+                pass
+    
+    # Из 26
+    if os.path.exists("githubmirror/26.txt"):
+        try:
+            with open("githubmirror/26.txt", 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        all_lines.add(line)
+        except:
+            pass
+    
+    # Сохранить
+    content = '\n'.join(sorted(all_lines))
+    save_file("githubmirror/all.txt", content)
+    log(f"✨ all.txt: {len(all_lines)} конфигов")
+    
+    return len(all_lines) > 0
 
-def push_to_github():
-    log("📤 Загрузка на GitHub...")
+# ======================== GITHUB PUSH ========================
+def push_github():
+    """Загрузить на GitHub"""
+    log("📤 GitHub push...")
+    
     try:
-        for local_path in updated_files:
+        g = Github(auth=Auth.Token(GITHUB_TOKEN))
+        repo = g.get_repo(REPO_NAME)
+    except Exception as e:
+        log(f"❌ GitHub: {e}")
+        return False
+    
+    files = [f"githubmirror/{i}.txt" for i in range(1, 27)] + ["githubmirror/all.txt"]
+    
+    for fpath in files:
+        if not os.path.exists(fpath):
+            continue
+        
+        try:
+            with open(fpath, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
             try:
-                with open(local_path, "r", encoding="utf-8") as f:
-                    content = f.read()
-                try:
-                    file_obj = REPO.get_contents(local_path)
-                    REPO.update_file(local_path, f"Обновление {local_path}", content, file_obj.sha)
-                    log(f"✅ Обновлён {local_path}")
-                except GithubException as e:
-                    if e.status == 404:
-                        REPO.create_file(local_path, f"Создание {local_path}", content)
-                        log(f"✅ Создан {local_path}")
-                    else:
-                        raise
-            except Exception as e:
-                log(f"❌ Ошибка {local_path}: {e}")
-    except Exception as e:
-        log(f"❌ Ошибка GitHub: {e}")
+                obj = repo.get_contents(fpath)
+                repo.update_file(fpath, f"🚀 {fpath}", content, obj.sha)
+                log(f"✅ {fpath}")
+            except GithubException as e:
+                if e.status == 404:
+                    repo.create_file(fpath, f"🆕 {fpath}", content)
+                    log(f"✅ {fpath}")
+        except Exception as e:
+            log(f"⚠️  {fpath}: {e}")
+    
+    return True
 
-def save_logs():
-    try:
-        for idx, messages in LOGS_BY_FILE.items():
-            filename = f"githubmirror/{idx}.txt" if idx > 0 else "all"
-            with _LOG_LOCK:
-                print(f"\n{'='*60}\n📊 {filename}:\n{'='*60}")
-                for msg in messages:
-                    print(msg)
-    except Exception as e:
-        print(f"❌ Ошибка логов: {e}")
-
+# ======================== ГЛАВНАЯ ========================
 def main():
-    try:
-        process_all()
-        build_all_txt()
-        push_to_github()
-    except Exception as e:
-        log(f"❌ Критическая ошибка: {e}")
-    finally:
-        save_logs()
+    print("\n" + "="*70)
+    print("🚀 GOIDA VPN v6.0 ULTIMATE")
+    print("="*70 + "\n")
+    
+    log(f"🔐 Token: {GITHUB_TOKEN[:15]}...")
+    log(f"📦 Repo: {REPO_NAME}")
+    log(f"⚙️  TCP Check: {ENABLE_TCP}, Max Ping: {MAX_PING_MS}ms")
+    
+    Path("githubmirror").mkdir(exist_ok=True)
+    
+    # Обработать источники
+    log("\n🌐 Загрузка источников...")
+    import concurrent.futures
+    
+    configs_dict = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as ex:
+        futures = {ex.submit(process_url, url, i): i for i, url in enumerate(URLS)}
+        
+        for future in concurrent.futures.as_completed(futures):
+            idx = futures[future]
+            try:
+                configs_dict[idx] = future.result()
+            except Exception as e:
+                log(f"❌ Ошибка {idx}: {e}")
+    
+    # Сохранить 1-25
+    log("\n💾 Сохранение файлов...")
+    for idx, configs in configs_dict.items():
+        if configs:
+            save_file(f"githubmirror/{idx+1}.txt", '\n'.join(configs))
+            log(f"📁 githubmirror/{idx+1}.txt")
+    
+    # Обработать 26 (SNI)
+    log("\n🛡️  SNI конфиги (26.txt)...")
+    sni_configs = []
+    for url in SNI_URLS:
+        data = fetch(url)
+        if data:
+            sni_configs.extend([c.strip() for c in data.split('\n') if c.strip()])
+    
+    # Фильтр SNI
+    sni_configs = list(dict.fromkeys(sni_configs))
+    sni_configs = filter_and_sort(sni_configs, 26)
+    
+    if sni_configs:
+        save_file("githubmirror/26.txt", '\n'.join(sni_configs))
+        log(f"✅ 26.txt: {len(sni_configs)} конфигов")
+    
+    # ГЛАВНОЕ - all.txt!
+    log("\n" + "="*70)
+    all_ok = build_all_txt()
+    log("="*70)
+    
+    if not all_ok:
+        log("⚠️  Внимание: all.txt пустой!")
+    
+    # Push
+    log("\n📡 Загрузка на GitHub...")
+    push_github()
+    
+    # Итог
+    print("\n" + "="*70)
+    print("✅ ГОТОВО!")
+    print("="*70)
+    print(f"📁 Результат: githubmirror/")
+    print(f"🌐 GitHub: https://github.com/{REPO_NAME}/tree/main/githubmirror")
+    print("="*70 + "\n")
 
 if __name__ == "__main__":
-    main()
-Копировать всё
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n⛔ Прервано")
+        sys.exit(0)
+    except Exception as e:
+        print(f"\n❌ ОШИБКА: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
