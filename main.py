@@ -9,7 +9,7 @@ TOKEN = os.environ.get('MY_TOKEN', '').strip()
 REPO_FULL = os.environ.get('REPO_NAME', 'SEDiK-Bes/goida-vpn-configs').strip()
 
 print('\n' + '='*70)
-print('[INIT] Starting GOIDA VPN v10.3 FIXED VERIFICATION')
+print('[INIT] Starting GOIDA VPN v10.4 DIRECT URL VERIFICATION')
 print('='*70)
 
 print(f'\n[DEBUG] Token check:')
@@ -33,6 +33,7 @@ except:
     sys.exit(1)
 
 GITHUB_API = 'https://api.github.com'
+GITHUB_RAW = f'https://raw.githubusercontent.com/{OWNER}/{REPO}/main'
 START_TIME = time.time()
 
 def log_time(msg, level='INFO'):
@@ -129,15 +130,17 @@ def gh_push_file(path, content, message):
 
 def gh_verify_all_txt():
     try:
-        r = requests.get(f'{GITHUB_API}/repos/{OWNER}/{REPO}/contents/githubmirror/all.txt', headers=gh_headers(), timeout=10)
+        # Используем RAW URL вместо API для надёжной проверки
+        raw_url = f'{GITHUB_RAW}/githubmirror/all.txt'
+        r = requests.get(raw_url, timeout=10)
         if r.status_code == 200:
-            data = r.json()
-            decoded = base64.b64decode(data['content']).decode('utf-8')
-            lines = [l.strip() for l in decoded.split('\n') if l.strip()]
+            content = r.text
+            lines = [l.strip() for l in content.split('\n') if l.strip()]
             config_count = len(lines)
-            file_size = data.get('size', 0)
+            file_size = len(content.encode('utf-8'))
             return (True, config_count, file_size)
         else:
+            log_time(f'RAW URL returned HTTP {r.status_code}', 'WARN')
             return (False, 0, 0)
     except Exception as e:
         log_time(f'Verification error: {e}', 'ERROR')
@@ -243,17 +246,20 @@ def main():
         log_time(f'all.txt push FAILED: HTTP {status} - {error}', 'ERROR')
         sys.exit(1)
     
-    log_time('PHASE 5: Verifying all.txt on GitHub...', 'PHASE')
+    time.sleep(1)
+    log_time('PHASE 5: Verifying all.txt on GitHub (RAW URL)...', 'PHASE')
     success, config_count, file_size = gh_verify_all_txt()
     if success and config_count > 0:
         elapsed = time.time() - START_TIME
         log_time(f'VERIFIED: {config_count} configs, {file_size} bytes', 'OK')
         print('\n' + '='*70)
-        print(f'SUCCESS! Time: {elapsed:.2f}s')
-        print(f'Total configs in all.txt: {config_count}')
+        print(f'✅ SUCCESS! Time: {elapsed:.2f}s')
+        print(f'📊 Total configs in all.txt: {config_count}')
+        print(f'📁 File: {GITHUB_RAW}/githubmirror/all.txt')
         print('='*70 + '\n')
     else:
-        log_time(f'VERIFICATION FAILED! config_count={config_count}, file_size={file_size}', 'ERROR')
+        log_time(f'VERIFICATION FAILED! config_count={config_count}', 'ERROR')
+        log_time(f'Trying RAW URL: {GITHUB_RAW}/githubmirror/all.txt', 'INFO')
         sys.exit(1)
 
 if __name__ == '__main__':
