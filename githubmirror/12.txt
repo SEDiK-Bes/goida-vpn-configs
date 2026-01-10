@@ -1,1 +1,1 @@
-vless://dd0cfef0-fda9-47ec-8a65-49d7bc004f82@151.101.3.8:80?encryption=none&amp;security=none&amp;type=ws&amp;host=mitivpn.global.ssl.fastly.net&amp;path=%2F---%40MiTiVPN%2F---%40MiTiVPN%2F---%40MiTiVPN%2F---%40MiTiVPN%2F---%40MiTiVPN#telegram%20%E2%98%82%EF%B8%8F%20dailyv2ry
+trojan://381f2e86233720eacda26d50e9aa26da@160.16.116.227:1281?sni=www.nintendogames.net&path=/#@Vip_Security join us - 396
