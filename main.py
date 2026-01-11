@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
-"""GOIDA VPN v4.2 - EC (от-10) + RU (обязательный) + Мир (все регионы)"""
+"""GOIDA VPN v4.2 - EC (от-10) + RU (обязательный) + Мир (все регионы)
+
+Дополнено:
+- генерация ссылок для HAPP через Yandex Cloud Function (прокси)
+- получение зашифрованных ссылок happ://crypt3/... через HAPP Crypto API
+
+Настройка:
+- переменная окружения YANDEX_PROXY_URL (пример: https://<id>.serverless.yandexcloud.net)
+
+Важно:
+- если YANDEX_PROXY_URL не задан, скрипт просто сгенерирует файлы githubmirror/*.txt как раньше.
+"""
+
 import os, sys, base64, re, time, socket, html, urllib.parse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import defaultdict
@@ -9,6 +21,11 @@ TOKEN = os.environ.get('MY_TOKEN', '').strip()
 if not TOKEN or not TOKEN.startswith('ghp_'):
     print('ERROR: Invalid MY_TOKEN'); sys.exit(1)
 
+# --- HAPP / Yandex integration (optional) ---
+YANDEX_PROXY_URL = os.environ.get('YANDEX_PROXY_URL', '').strip().rstrip('/')
+HAPP_CRYPTO_API = os.environ.get('HAPP_CRYPTO_API', 'https://crypto.happ.su/api.php').strip()
+ENABLE_HAPP_LINKS = os.environ.get('ENABLE_HAPP_LINKS', '1').strip() not in ('0', 'false', 'False')
+
 START = time.time()
 print('\n' + '='*70)
 print('🚳 GOIDA VPN v4.2 - EC (от-10) | RU (обязательный) | Мир (остальные)')
@@ -17,6 +34,69 @@ print('='*70 + '\n')
 
 def log_t(msg):
     print(f'[{time.time()-START:6.2f}s] {msg}')
+
+
+def happ_encrypt_url(url_to_encrypt: str) -> str:
+    """Возвращает happ://crypt3/... (или другой supported scheme), либо пустую строку."""
+    try:
+        r = requests.post(
+            HAPP_CRYPTO_API,
+            json={"url": url_to_encrypt},
+            timeout=12,
+            headers={"Accept": "application/json, text/plain, */*"},
+        )
+        if r.status_code != 200:
+            return ''
+
+        # API может отвечать JSON или plain text
+        ct = (r.headers.get('content-type') or '').lower()
+        if 'application/json' in ct:
+            j = r.json() if r.text else {}
+            return (j.get('url') or j.get('encrypted_url') or j.get('result') or '').strip()
+
+        # fallback: plain text body
+        return (r.text or '').strip()
+
+    except Exception:
+        return ''
+
+
+def maybe_print_happ_links():
+    """Печатает и сохраняет happ://crypt3/... ссылки, если задан YANDEX_PROXY_URL."""
+    if not ENABLE_HAPP_LINKS:
+        return
+
+    if not YANDEX_PROXY_URL:
+        log_t('HAPP LINKS: YANDEX_PROXY_URL не задан — пропускаю генерацию happ://crypt3 ссылок')
+        log_t('HAPP LINKS: см. docs/happ_yandex_proxy.md')
+        return
+
+    mapping = {
+        'EC': 'set_a',
+        'RU': 'set_b',
+        'WORLD': 'set_c',
+    }
+
+    out_lines = []
+
+    log_t('PHASE 7: Generating HAPP crypt3 links (via Yandex proxy)...')
+    for name, source_code in mapping.items():
+        proxy_url = f"{YANDEX_PROXY_URL}?source={source_code}"
+        enc = happ_encrypt_url(proxy_url)
+        if enc and enc.startswith('happ://'):
+            out_lines.append(f"{name}: {enc}")
+            log_t(f"✓ HAPP {name}: {enc[:48]}...")
+        else:
+            out_lines.append(f"{name}: (FAILED) {proxy_url}")
+            log_t(f"✗ HAPP {name}: failed to encrypt")
+
+    # сохраняем локально (не пушим в GitHub)
+    try:
+        with open('happ_crypt3_links.txt', 'w', encoding='utf-8', newline='\n') as f:
+            f.write('\n'.join(out_lines) + '\n')
+        log_t('Saved: happ_crypt3_links.txt')
+    except Exception:
+        log_t('WARN: cannot write happ_crypt3_links.txt')
 
 
 SOURCES = [
@@ -286,6 +366,9 @@ if world_lines:
         log_t(f'✓ world.txt: {len(world_lines)} configs (все остальные регионы)')
     else:
         log_t(f'✗ world.txt FAILED')
+
+# --- optional: HAPP links ---
+maybe_print_happ_links()
 
 elapsed = time.time() - START
 print(f'\n✅ SUCCESS! Time: {elapsed:.1f}s')
