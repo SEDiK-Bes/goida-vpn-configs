@@ -1,0 +1,39 @@
+name: Deploy to Yandex Cloud
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'main.py'
+      - '.github/workflows/deploy.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install Yandex Cloud CLI
+        run: |
+          curl https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+          
+      - name: Set up YC config
+        env:
+          YC_TOKEN: ${{ secrets.YANDEX_IAM_TOKEN }}
+        run: |
+          mkdir -p ~/.config/yc
+          echo "token: $YC_TOKEN" > ~/.config/yc/config.yaml
+          echo "cloud-id: b1g7j3fbj8r8kp3m4k5n" >> ~/.config/yc/config.yaml
+          echo "folder-id: b1gv87ssvu78i742khbt" >> ~/.config/yc/config.yaml
+          echo "endpoint: api.cloud.yandex.net:443" >> ~/.config/yc/config.yaml
+      
+      - name: Deploy function
+        run: |
+          yc serverless function versions create \
+            --function-name=data-proxy \
+            --runtime=python311 \
+            --entrypoint=main.handler \
+            --memory=256MB \
+            --execution-timeout=30s \
+            --source-path=./main.py
